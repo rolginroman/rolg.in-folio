@@ -1,0 +1,25 @@
+name: Deploy build smoke (temporary)
+
+on:
+  push:
+    branches:
+      - chore/pnpm-migration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  R_BASE_URL: ${{ vars.R_BASE_URL }}
+  R_HOSTNAME: ${{ vars.R_HOSTNAME }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout your repository using git
+        uses: actions/checkout@v7
+      - name: Install, build, and upload your site
+        uses: withastro/action@v6
+        with:
+          node-version: 24
