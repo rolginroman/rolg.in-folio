@@ -5,6 +5,17 @@
 [![Main Domain (Netlify)](https://img.shields.io/badge/https%3A%2F%2Frolg.in-8A2BE2?style=for-the-badge)](https://l.rolg.in/)
 
 
+## Setup
+
+Node.js version is pinned in `.nvmrc` (24). Install pnpm without Corepack:
+
+```sh
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+pnpm is a self-contained executable and reads the `packageManager` field in
+`package.json`, so it switches itself to the version this project expects.
+
 ## Commands
 
 All commands are run from the root of the project, from a terminal:
