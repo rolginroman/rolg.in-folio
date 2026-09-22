@@ -8,21 +8,21 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository using git
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: 18.16.x
-          cache: npm
+          node-version-file: .nvmrc
+          cache: pnpm
       - name: Install
-        run: yarn install --immutable --inline-builds
+        run: pnpm install --frozen-lockfile
       - name: Lint project
-        run: yarn lint
+        run: pnpm lint
