@@ -1,5 +1,5 @@
 ---
-import { identity, bio, photo, techGroups, yearsOfExperience } from "../../data/profile";
+import { identity, bio, photo, focus, yearsOfExperience } from "../../data/profile";
 import SpecStrip from "./SpecStrip.astro";
 import Btn from "./Btn.astro";
 import DotField from "./DotField.astro";
@@ -14,13 +14,10 @@ const nameplate = identity.fullName
 const dotIndex = cell;
 const n = dotIndex + 1;
 
-/** The language he leads with, and the domain that separates him — both from data. */
-const core = [techGroups[0]?.items[0]?.name, techGroups[1]?.label].filter(Boolean).join(" · ");
-
 const specs = [
   { label: "Experience", value: `${yearsOfExperience}+ years` },
   { label: "Base", value: identity.location },
-  { label: "Focus", value: core },
+  { label: "Focus", value: focus },
   { label: "Handle", value: `@${identity.handle}` },
 ];
 ---

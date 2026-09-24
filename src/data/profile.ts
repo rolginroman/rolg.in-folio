@@ -160,6 +160,13 @@ export const techGroups: TechGroup[] = [
 /** Flat list, in group order. Use when the design wants one continuous run. */
 export const tech: TechItem[] = techGroups.flatMap((group) => group.items);
 
+/**
+ * The language he leads with, and the group that separates him — both read
+ * off `techGroups` rather than written by hand, so the spec strip (site and
+ * OG image alike) can't drift from the stack list above it.
+ */
+export const focus = [techGroups[0]?.items[0]?.name, techGroups[1]?.label].filter(Boolean).join(" · ");
+
 export interface Project {
   name: string;
   /** One line, plain. What it is. */
