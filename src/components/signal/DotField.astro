@@ -1,0 +1,450 @@
+<canvas class="sg-field" data-sg-field aria-hidden="true"></canvas>
+
+<style lang="scss">
+  .sg-field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.14) 72%, transparent 100%);
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.14) 72%, transparent 100%);
+  }
+
+  :global(.identity[data-field-live]) .sg-field {
+    display: block;
+  }
+</style>
+
+<script is:inline>
+  function init() {
+    try {
+      const root = document.querySelector(".identity");
+      if (!root) return;
+
+      const STARTUP = ["encoded", "dust", "clock", "off"];
+      /* modes repaint() can draw — startup paint modes plus runtime-only lamp */
+      const RUNTIME = ["encoded", "dust", "clock", "lamp"];
+      let baseMode = root.dataset.field;
+      if (!STARTUP.includes(baseMode)) baseMode = "encoded";
+
+      const qs = new URLSearchParams(location.search).get("field");
+      if (qs && STARTUP.includes(qs)) baseMode = qs;
+
+      root.dataset.field = baseMode;
+      if (baseMode === "off") return;
+
+      let mode = baseMode;
+
+      const canvas = root.querySelector("[data-sg-field]");
+      if (!canvas || !(canvas instanceof HTMLCanvasElement)) return;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const CELL = 16;
+      /* Dot centres of the CSS lattice, measured from the top-left of .identity.
+         background-position 8px + the gradient circle's own 8px centre = 16, so
+         centres land on multiples of CELL. Verified against .identity::before. */
+      const PHASE = 0;
+      const RADIUS = 1;
+      const cellX = (c) => PHASE + c * CELL;
+      const cellY = (r) => PHASE + r * CELL;
+
+      /* Encoding: ASCII, one character per row, eight cells wide, bit 7 (the most
+         significant bit) at the left, a dot painted where the bit is 1 and nothing
+         where it is 0. Rows read top to bottom and spell the plaintext. The 8x7
+         block tiles across and down the whole field, so the period-8 structure is
+         visible and the message is recoverable from any tile.
+         Plaintext: "rolg.in" — his domain.
+         r 0x72 01110010
+         o 0x6F 01101111
+         l 0x6C 01101100
+         g 0x67 01100111
+         . 0x2E 00101110
+         i 0x69 01101001
+         n 0x6E 01101110 */
+      const ENCODED = [0x72, 0x6f, 0x6c, 0x67, 0x2e, 0x69, 0x6e];
+
+      let w = 0;
+      let h = 0;
+      let cols = 0;
+      let rows = 0;
+      let dpr = 1;
+      let dust = null;
+      let rectCache = null;
+      let resizeRaf = 0;
+      let dustRaf = 0;
+      let dustPending = [];
+      let pendingPaint = false;
+      let overlayT = 0;
+      let overlayTarget = 0;
+      let overlayMode = null;
+      let overlayRaf = 0;
+      let overlayAnimStart = 0;
+      let overlayAnimFrom = 0;
+      let overlayAnimTo = 0;
+      const OVERLAY_IN_MS = 280;
+      const OVERLAY_OUT_MS = 220;
+      const STAGGER_SPREAD = 0.35;
+      let reducedMotion = false;
+
+      try {
+        reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      } catch {
+        /* matchMedia unavailable — animate normally */
+      }
+
+      function palette() {
+        const cs = getComputedStyle(root);
+        return {
+          base: cs.getPropertyValue("--rule-strong").trim() || "#333333",
+          hot: cs.getPropertyValue("--ink-3").trim() || "#8b8b8b",
+        };
+      }
+
+      function gridDims(width, height) {
+        return {
+          cols: Math.max(0, Math.floor((width - PHASE) / CELL) + 1),
+          rows: Math.max(0, Math.floor((height - PHASE) / CELL) + 1),
+        };
+      }
+
+      function invalidateRect() {
+        rectCache = null;
+      }
+
+      function getRect() {
+        if (!rectCache) rectCache = root.getBoundingClientRect();
+        return rectCache;
+      }
+
+      function drawDot(x, y, color, alpha) {
+        ctx.fillStyle = color;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.arc(x, y, RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function smoothstep(t) {
+        return t * t * (3 - 2 * t);
+      }
+
+      /* normalised centre distance → per-cell ramp so lamp warms outward */
+      function cellStaggerT(c, r, t) {
+        if (cols <= 1 && rows <= 1) return t;
+        const cx = (cols - 1) * 0.5;
+        const cy = (rows - 1) * 0.5;
+        const maxD = Math.hypot(cx, cy) || 1;
+        const d = Math.hypot(c - cx, r - cy) / maxD;
+        return Math.max(0, Math.min(1, (t - d * STAGGER_SPREAD) / (1 - STAGGER_SPREAD)));
+      }
+
+      function cancelOverlayRaf() {
+        if (overlayRaf) {
+          cancelAnimationFrame(overlayRaf);
+          overlayRaf = 0;
+        }
+      }
+
+      function paintEncoded(composite, blendT) {
+        const { base } = palette();
+        if (!composite) ctx.clearRect(0, 0, w, h);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const bit = (ENCODED[r % ENCODED.length] >> (7 - (c % 8))) & 1;
+            if (!bit) continue;
+            const alpha = composite ? 0.9 * blendT : 0.9;
+            if (alpha > 0) drawDot(cellX(c), cellY(r), base, alpha);
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function paintDustFull(composite, blendT) {
+        const { base, hot } = palette();
+        if (!composite) ctx.clearRect(0, 0, w, h);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const disturbed = dust[r * cols + c];
+            const baseAlpha = disturbed ? 0.9 : 1;
+            const alpha = composite ? baseAlpha * blendT : baseAlpha;
+            if (alpha > 0) drawDot(cellX(c), cellY(r), disturbed ? hot : base, alpha);
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function paintDustCells(cells) {
+        const { hot } = palette();
+        for (const { c, r } of cells) {
+          drawDot(cellX(c), cellY(r), hot, 0.9);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function paintClock(composite, blendT) {
+        const { base } = palette();
+        const now = new Date();
+        const curHour = now.getHours();
+        const curMinute = now.getMinutes();
+
+        if (!composite) ctx.clearRect(0, 0, w, h);
+
+        for (let hh = 0; hh < 24 && hh < cols; hh++) {
+          for (let mm = 0; mm < 60 && mm < rows; mm++) {
+            const alpha = composite ? 0.12 * blendT : 0.12;
+            if (alpha > 0) drawDot(cellX(hh), cellY(mm), base, alpha);
+          }
+        }
+
+        for (let hh = 0; hh < 24 && hh < cols; hh++) {
+          if (hh > curHour) continue;
+          const hourAlpha = 0.22 + 0.78 * (hh / 23);
+          const maxMin = hh < curHour ? 59 : curMinute;
+          for (let mm = 0; mm <= maxMin && mm < rows; mm++) {
+            const alpha = composite ? hourAlpha * blendT : hourAlpha;
+            if (alpha > 0) drawDot(cellX(hh), cellY(mm), base, alpha);
+          }
+        }
+
+        ctx.globalAlpha = 1;
+      }
+
+      /* lamp test: every cell at full brightness — same lattice, no message */
+      function paintLamp(composite, blendT) {
+        const { hot } = palette();
+        if (!composite) ctx.clearRect(0, 0, w, h);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const alpha = composite ? cellStaggerT(c, r, blendT) : 1;
+            if (alpha > 0) drawDot(cellX(c), cellY(r), hot, alpha);
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function paintMode(which, composite, blendT) {
+        if (which === "encoded") paintEncoded(composite, blendT);
+        else if (which === "dust") paintDustFull(composite, blendT);
+        else if (which === "clock") paintClock(composite, blendT);
+        else if (which === "lamp") paintLamp(composite, blendT);
+      }
+
+      function paintBase(composite, blendT) {
+        paintMode(baseMode, composite, blendT);
+      }
+
+      function stepOverlay(now) {
+        const duration = overlayAnimTo > overlayAnimFrom ? OVERLAY_IN_MS : OVERLAY_OUT_MS;
+        const raw = Math.min(1, (now - overlayAnimStart) / duration);
+        overlayT = overlayAnimFrom + (overlayAnimTo - overlayAnimFrom) * smoothstep(raw);
+
+        if (raw >= 1) {
+          overlayT = overlayAnimTo;
+          overlayRaf = 0;
+          if (overlayT === 0) {
+            overlayMode = null;
+            mode = baseMode;
+          }
+        } else {
+          overlayRaf = requestAnimationFrame(stepOverlay);
+        }
+        repaint();
+      }
+
+      function setOverlayTarget(target, nextMode) {
+        overlayTarget = target;
+
+        if (target === 1 && nextMode) {
+          overlayMode = nextMode;
+          mode = nextMode;
+        }
+
+        if (reducedMotion) {
+          cancelOverlayRaf();
+          overlayT = target;
+          if (target === 0) {
+            overlayMode = null;
+            mode = baseMode;
+          }
+          repaint();
+          return;
+        }
+
+        overlayAnimFrom = overlayT;
+        overlayAnimTo = target;
+        overlayAnimStart = performance.now();
+        cancelOverlayRaf();
+        overlayRaf = requestAnimationFrame(stepOverlay);
+      }
+
+      function repaint() {
+        if (document.hidden) {
+          pendingPaint = true;
+          return;
+        }
+        pendingPaint = false;
+
+        if (overlayT <= 0 && overlayTarget <= 0 && !overlayRaf) {
+          paintBase(false, 1);
+          return;
+        }
+
+        if (overlayT >= 1 && overlayTarget >= 1 && !overlayRaf && overlayMode) {
+          paintMode(overlayMode, false, 1);
+          return;
+        }
+
+        /* cross-fade: one clear, base fades out as overlay fades in — no over-draw */
+        ctx.clearRect(0, 0, w, h);
+        const baseFade = 1 - overlayT;
+        if (baseFade > 0) paintBase(true, baseFade);
+        if (overlayMode && overlayT > 0) paintMode(overlayMode, true, overlayT);
+      }
+
+      /* sg:field — runtime mode channel. detail.mode switches; detail.restore
+         or a missing/null mode snaps back to the resolved startup mode. */
+      document.addEventListener("sg:field", (event) => {
+        const detail = event.detail;
+        if (!detail || detail.restore || detail.mode == null) {
+          setOverlayTarget(0);
+          return;
+        }
+        if (!RUNTIME.includes(detail.mode)) return;
+        if (detail.mode === baseMode) {
+          setOverlayTarget(0);
+          return;
+        }
+        setOverlayTarget(1, detail.mode);
+      });
+
+      function clientToCell(clientX, clientY) {
+        const rect = getRect();
+        const c = Math.round((clientX - rect.left - PHASE) / CELL);
+        const r = Math.round((clientY - rect.top - PHASE) / CELL);
+        if (c < 0 || r < 0 || c >= cols || r >= rows) return null;
+        return { c, r };
+      }
+
+      function onPointer(clientX, clientY) {
+        /* runtime overlay (e.g. lamp) owns the canvas — skip dust ink */
+        if (mode !== baseMode) return;
+        const cell = clientToCell(clientX, clientY);
+        if (!cell) return;
+
+        const idx = cell.r * cols + cell.c;
+        if (dust[idx]) return;
+
+        dust[idx] = 1;
+        dustPending.push(cell);
+
+        if (!dustRaf) {
+          dustRaf = requestAnimationFrame(() => {
+            dustRaf = 0;
+            const batch = dustPending;
+            dustPending = [];
+            if (batch.length === 0) return;
+            if (document.hidden) {
+              pendingPaint = true;
+              return;
+            }
+            paintDustCells(batch);
+          });
+        }
+      }
+
+      function sizeCanvas() {
+        const rect = root.getBoundingClientRect();
+        w = rect.width;
+        h = rect.height;
+        rectCache = rect;
+
+        dpr = Math.min(window.devicePixelRatio || 1, 3);
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const oldCols = cols;
+        const oldRows = rows;
+        const oldDust = dust;
+        const dims = gridDims(w, h);
+        cols = dims.cols;
+        rows = dims.rows;
+
+        if (baseMode === "dust") {
+          const next = new Uint8Array(cols * rows);
+          if (oldDust && oldCols > 0 && oldRows > 0) {
+            const copyC = Math.min(oldCols, cols);
+            const copyR = Math.min(oldRows, rows);
+            for (let r = 0; r < copyR; r++) {
+              for (let c = 0; c < copyC; c++) {
+                next[r * cols + c] = oldDust[r * oldCols + c];
+              }
+            }
+          }
+          dust = next;
+        }
+
+        repaint();
+      }
+
+      function scheduleClockTick() {
+        const delay = 60000 - (Date.now() % 60000) + 50;
+        window.setTimeout(() => {
+          if (document.hidden) {
+            pendingPaint = true;
+          } else {
+            repaint();
+          }
+          scheduleClockTick();
+        }, delay);
+      }
+
+      const ro = new ResizeObserver(() => {
+        if (resizeRaf) cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(() => {
+          resizeRaf = 0;
+          sizeCanvas();
+        });
+      });
+      ro.observe(root);
+
+      window.addEventListener("scroll", invalidateRect, { passive: true });
+      window.addEventListener("resize", invalidateRect);
+
+      matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => repaint());
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) return;
+        /* rAF may stall while hidden — resume from current overlayT, not frozen mid-ramp */
+        if (overlayT !== overlayTarget && !reducedMotion) {
+          if (overlayTarget === 1 && overlayMode) setOverlayTarget(1, overlayMode);
+          else setOverlayTarget(0);
+          return;
+        }
+        if (pendingPaint) repaint();
+      });
+
+      if (baseMode === "dust") {
+        root.addEventListener("pointermove", (e) => onPointer(e.clientX, e.clientY));
+        root.addEventListener("pointerdown", (e) => onPointer(e.clientX, e.clientY));
+      }
+
+      sizeCanvas();
+      root.setAttribute("data-field-live", "");
+
+      if (baseMode === "clock") scheduleClockTick();
+    } catch {
+      /* degrade to ::before lattice */
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+</script>

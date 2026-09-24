@@ -1,55 +1,14 @@
 ---
-// https://meowni.ca/font-style-matcher/
 import Layout from "@/layouts/Layout.astro";
-import About from "@/sections/About.astro";
-import Contacts from "@/sections/Contacts.astro";
-import Projects from "@/sections/Projects.astro";
-import Tech from "@/sections/Tech.astro";
-import { SEO } from "astro-seo";
-
-const baseUrl = import.meta.env.BASE_URL;
+import Identity from "@/signal/Identity.astro";
+import Stack from "@/signal/Stack.astro";
+import Repos from "@/signal/Repos.astro";
+import Contact from "@/signal/Contact.astro";
 ---
 
 <Layout>
-  <SEO
-    slot="seo-header"
-    title="I'm Rolgin Roman 🚀"
-    description="Rolgin Roman's personal website with social media links and several examples of work"
-    openGraph={{
-      basic: {
-        title: "I'm Rolgin Roman 🚀",
-        type: "website",
-        image: `${baseUrl}og-image.png`,
-      },
-    }}
-    twitter={{
-      creator: "@rolginroman",
-      title: "I'm Rolgin Roman 🚀",
-      description: "Software engineer 👨🏻‍💻 Web adept",
-      image: `${baseUrl}og-image.png`,
-      imageAlt: "Rolgin Roman website",
-    }}
-    extend={{
-      link: [{ rel: "icon", href: `${baseUrl}favicon.svg` }],
-    }}
-  />
-  <main>
-    <About id="about" />
-    <Tech id="tech" />
-    <Projects id="projects" />
-    <Contacts id="contacts" />
-  </main>
+  <Identity />
+  <Stack />
+  <Repos />
+  <Contact />
 </Layout>
-
-<style lang="scss">
-  @use "styles.scss" as utils;
-
-  main {
-    @include utils.contentMaxWidth();
-    margin-top: 2rem;
-
-    @include utils.tablet {
-      margin-top: unset;
-    }
-  }
-</style>
