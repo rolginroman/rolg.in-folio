@@ -1,8 +1,0 @@
-Fonts in this folder are self-hosted for the SIGNAL demo route only.
-
-Doto            — SIL Open Font License 1.1 — https://fonts.google.com/specimen/Doto
-Space Grotesk   — SIL Open Font License 1.1 — https://fonts.google.com/specimen/Space+Grotesk
-Space Mono      — SIL Open Font License 1.1 — https://fonts.google.com/specimen/Space+Mono
-
-Latin subsets only, taken from the Google Fonts static CDN and served from this
-origin so the page makes no third-party font request at runtime.
