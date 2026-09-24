@@ -2,16 +2,23 @@
 import { identity } from "../../data/profile";
 
 interface NavItem {
-  href: string;
+  id: string;
   label: string;
 }
 
 const nav: NavItem[] = [
-  { href: "#identity", label: "Identity" },
-  { href: "#stack", label: "Stack" },
-  { href: "#work", label: "Work" },
-  { href: "#contact", label: "Contact" },
+  { id: "identity", label: "Identity" },
+  { id: "stack", label: "Stack" },
+  { id: "work", label: "Work" },
+  { id: "contact", label: "Contact" },
 ];
+
+/* the section ids only exist on the home page — link there from
+   anywhere else, and keep plain #id fragments on home so the
+   scroll-spy script below still matches a[href^="#"] */
+const baseUrl = import.meta.env.BASE_URL;
+const trimSlash = (value: string) => value.replace(/\/+$/, "");
+const onHome = trimSlash(Astro.url.pathname) === trimSlash(baseUrl);
 ---
 
 <header class="rail">
@@ -22,7 +29,7 @@ const nav: NavItem[] = [
         {
           nav.map((item) => (
             <li>
-              <a class="sg-label" href={item.href}>
+              <a class="sg-label" href={onHome ? `#${item.id}` : `${baseUrl}#${item.id}`}>
                 {item.label}
               </a>
             </li>
