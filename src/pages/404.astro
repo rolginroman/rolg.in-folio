@@ -1,123 +1,84 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Icon from "astro-icon";
-import { SEO } from "astro-seo";
+import Layout from "@/layouts/Layout.astro";
 
 const baseUrl = import.meta.env.BASE_URL;
 ---
 
-<Layout disableInteractions={true}>
-  <SEO
-    slot="seo-header"
-    title="Oops, this's an unpleasant place"
-    description="There was a typo maybe? Not found page"
-    openGraph={{
-      basic: {
-        title: "'m Rolgin Roman 🚀",
-        type: "website",
-        image: `${baseUrl}og-image.png`,
-      },
-    }}
-    twitter={{
-      creator: "@rolginroman",
-      title: "I'm Rolgin Roman 🚀",
-      description: "Software engineer 👨🏻‍💻 Web adept",
-      image: `${baseUrl}og-image.png`,
-      imageAlt: "Rolgin Roman website",
-    }}
-    extend={{
-      link: [{ rel: "icon", href: `${baseUrl}favicon.svg` }],
-    }}
-  />
-  <section>
-    <h1>404</h1>
-    <h2>Whoops, we've been lost for some time</h2>
-    <span>but</span>
-    <a href={baseUrl} aria-label="Go to home page"
-      >This is the way<Icon class:list={["mando"]} name="mando" width="2em" height="2em" aria-hidden="true" /></a
-    >
+<Layout title="Oops, this's an unpleasant place" description="There was a typo maybe? Not found page">
+  <section class="not-found">
+    <div class="sg-wrap">
+      <h1 class="code">404</h1>
+      <p class="msg">Whoops, we&rsquo;ve been lost for some time</p>
+      <p class="but sg-label">but</p>
+      <a class="way" href={baseUrl} aria-label="Go to home page">This is the way</a>
+    </div>
   </section>
 </Layout>
 
 <style lang="scss">
-  @use "sass:list";
-  @use "styles.scss" as utils;
-
-  section {
-    @include utils.contentMaxWidth();
+  .not-found {
     display: grid;
     place-content: center;
     place-items: center;
-  }
-
-  h1 {
     text-align: center;
-    // font-size: 16em;
-    @include utils.font(heading, 5xl);
-    color: utils.text-color(main);
-    margin: 0.1em 0;
+    min-height: 60vh;
+    padding-block: clamp(3rem, 8vw, 6rem);
   }
 
-  @include utils.centerHeaders();
-
-  h2 {
-    margin: 0.3em 0;
+  .sg-wrap {
+    display: grid;
+    place-items: center;
+    gap: 0.75rem;
   }
 
-  h2,
-  a {
-    @include utils.font(text, l);
-    color: utils.text-color(main);
+  .code {
+    font-family: var(--dot);
+    font-weight: 600;
+    font-size: var(--t-display);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    color: var(--ink-0);
+    margin: 0;
   }
 
-  span {
-    text-align: center;
-    @include utils.font(text, m);
-    color: utils.text-color(main);
-    margin: 0.3em 0;
+  .msg {
+    font-size: var(--t-lead);
+    font-weight: 300;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--ink-1);
+    max-width: 26ch;
   }
 
-  a {
-    display: flex;
+  .but {
+    margin-top: 0.5rem;
+  }
+
+  .way {
     position: relative;
-    justify-content: center;
-    margin: 0.3em 0;
-    padding: 0 8px;
-    $mandoGradientColor: utils.color(main) utils.color(secondary) utils.color(accent) transparent transparent;
-
-    @for $i from 1 through list.length($mandoGradientColor) {
-      --gradient-mando-stop-#{$i}: #{list.nth($mandoGradientColor, $i)};
-    }
-
-    &::after {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 0.1em;
-      bottom: 0;
-      left: 0;
-      border-radius: 0.2em;
-      transform: scaleX(0);
-      background-color: utils.color(secondary);
-      transform-origin: bottom right;
-
-      @include utils.skipIfNoMotionPrefered {
-        transition: transform 0.25s ease-out;
-      }
-    }
-
-    &:hover::after {
-      transform: scaleX(1);
-      transform-origin: bottom left;
-    }
+    padding: 0 0.25rem 0.4rem;
+    font-size: var(--t-title);
+    color: var(--ink-1);
+    text-decoration: none;
   }
 
-  .mando {
-    border-radius: 16px;
-    width: 3em;
-    height: 3em;
+  .way::after {
+    content: "";
     position: absolute;
-    bottom: -0.5em;
-    right: -2.8em;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--rule-strong);
+    transform: scaleX(1);
+    transform-origin: right;
+  }
+
+  .way:hover {
+    color: var(--ink-0);
+  }
+
+  .way:hover::after {
+    background: var(--accent);
   }
 </style>

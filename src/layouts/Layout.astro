@@ -1,92 +1,72 @@
 ---
-import "../styles/global.scss";
-import FluidDesignSystem from "@/global/FluidDesignSystem.astro";
-import ThemeInjector from "@/global/ThemeInjector.astro";
-import Header from "@/blocks/Header.astro";
-import Footer from "@/blocks/Footer.astro";
+import "../styles/base.scss";
+import doto from "../styles/fonts/doto-latin-var.woff2";
+import grotesk from "../styles/fonts/space-grotesk-latin-var.woff2";
+import mono400 from "../styles/fonts/space-mono-latin-400.woff2";
+import mono700 from "../styles/fonts/space-mono-latin-700.woff2";
+import { SEO } from "astro-seo";
+import { identity, seo } from "../data/profile";
+import Rail from "@/signal/Rail.astro";
+import ActionBar from "@/signal/ActionBar.astro";
 
 export interface Props {
-  disableInteractions?: boolean;
+  title?: string;
+  description?: string;
 }
 
-const { disableInteractions = false } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL;
+const fonts = [doto, grotesk, mono400, mono700];
+const { title = `${identity.fullName} — ${identity.role}`, description = seo.description } = Astro.props;
 ---
 
 <!DOCTYPE html>
-<html lang="en" class="dark" data-critters-container>
+<html lang="en" data-critters-container>
   <head>
-    <ThemeInjector />
-    <FluidDesignSystem />
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <slot name="seo-header" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f2f2f0" media="(prefers-color-scheme: light)" />
+    <SEO
+      title={title}
+      description={description}
+      openGraph={{
+        basic: {
+          title,
+          type: "website",
+          image: `${baseUrl}og-image.png`,
+        },
+      }}
+      twitter={{
+        creator: seo.twitterCreator,
+        title,
+        description: seo.twitterDescription,
+        image: `${baseUrl}og-image.png`,
+        imageAlt: seo.imageAlt,
+      }}
+      extend={{
+        link: [{ rel: "icon", href: `${baseUrl}favicon.svg`, type: "image/svg+xml" }],
+      }}
+    />
+    {
+      fonts.map((href) => (
+        <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />
+      ))
+    }
   </head>
-
   <body>
-    <Header disableInteractions={disableInteractions} />
-    <slot />
-    <Footer />
-    <style is:global lang="scss">
-      @use "styles.scss" as *;
-
-      :root {
-        /* critters:include start */
-        @include applyPalette();
-        /* critters:include end */
-        @include applyFontFace();
-      }
-
-      html {
-        font-family: "Inter", "Helvetica", sans-serif;
-      }
-
-      body {
-        --header-height: 62px;
-
-        overflow-x: hidden;
-
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        background-color: color(light);
-
-        & > *:nth-child(2) {
-          flex-grow: 1;
-        }
-
-        &:before {
-          content: "";
-          position: absolute;
-          display: flex;
-          width: 100vw;
-          height: 130%;
-          max-height: 100vh;
-          background: linear-gradient(to bottom, transparent 75%, #{color("light")}) 0% 0% / 100vw 100%,
-            radial-gradient(#{color("secondary", 0.5)} 0.05em, transparent 0.05em) 0% 0% / 1vmin 1vmin;
-          pointer-events: none;
-          z-index: -1;
-        }
-      }
-    </style>
-
-    <script>
-      import { matchReducedMotion } from "@/scripts/media.service";
-      const onScroll = () => {
-        let scroll = window.pageYOffset / (document.body.offsetHeight - window.innerHeight);
-        scroll = isFinite(scroll) ? scroll : 0;
-        document.body.style.setProperty("--scroll", `${scroll}`);
-      };
-
-      const handleScroll = (matches: boolean) => {
-        if (!matches) {
-          window.addEventListener("scroll", onScroll, false);
-        } else {
-          window.removeEventListener("scroll", onScroll);
-        }
-      };
-
-      matchReducedMotion(handleScroll);
-    </script>
+    <a class="sg-skip" href="#main">Skip to content</a>
+    <div class="sg-rules" aria-hidden="true">
+      <div>
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="sg-page">
+      <Rail />
+      <main id="main">
+        <slot />
+      </main>
+    </div>
+    <ActionBar />
   </body>
 </html>
