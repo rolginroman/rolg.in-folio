@@ -1,0 +1,845 @@
+---
+import { identity, bio, photo, techGroups, yearsOfExperience } from "../../data/profile";
+import SpecStrip from "./SpecStrip.astro";
+import Btn from "./Btn.astro";
+import DotField from "./DotField.astro";
+import { links } from "../../const";
+
+/** Nameplate is split per glyph so the dot-matrix can power on one cell at a time. */
+let cell = 0;
+const nameplate = identity.fullName
+  .toUpperCase()
+  .split(" ")
+  .map((word) => ({ chars: [...word].map((char) => ({ char, i: cell++ })) }));
+const dotIndex = cell;
+const n = dotIndex + 1;
+
+/** The language he leads with, and the domain that separates him — both from data. */
+const core = [techGroups[0]?.items[0]?.name, techGroups[1]?.label].filter(Boolean).join(" · ");
+
+const specs = [
+  { label: "Experience", value: `${yearsOfExperience}+ years` },
+  { label: "Base", value: identity.location },
+  { label: "Focus", value: core },
+  { label: "Handle", value: `@${identity.handle}` },
+];
+---
+
+<section id="identity" class="identity" data-field="encoded" aria-labelledby="identity-name">
+  <DotField />
+  <div class="sg-wrap grid">
+    <h1 id="identity-name" class="nameplate">
+      <span class="sr">{identity.fullName}</span>
+      <span class="chars" style={`--n:${n}`}>
+                {
+          nameplate.map((word, w) => (
+            <Fragment>
+              {w > 0 ? " " : null}
+              <span class="word" aria-hidden="true">
+                {word.chars.map((glyph) => (
+                  <span class="ch" style={`--i:${glyph.i}`}>
+                    {glyph.char}
+                  </span>
+                ))}
+              </span>
+            </Fragment>
+          ))
+        }<span class="dot" style={`--i:${dotIndex}`}></span>
+      </span>
+    </h1>
+
+    <p class="role">{identity.role}</p>
+
+    <figure class="plate">
+      <img
+        src={photo.src}
+        srcset={photo.srcset}
+        width="256"
+        height="256"
+        alt={photo.alt}
+        decoding="async"
+        loading="eager"
+        crossorigin="anonymous"
+      />
+      <canvas class="raster" aria-hidden="true"></canvas>
+      <figcaption class="sg-label" data-caption>Fig. 01 — operator</figcaption>
+    </figure>
+
+    <p class="bio">{bio[1]}</p>
+
+    <div class="actions">
+      <Btn href={links.cv} label="Download CV" variant="primary" icon="arrow-down" external />
+    </div>
+
+    <div class="specs">
+      <SpecStrip items={specs} />
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  .identity {
+    position: relative;
+    padding-block: clamp(2.25rem, 6vw, 4.5rem) 0;
+    scroll-margin-top: 3rem;
+  }
+
+  /* dot field: atmosphere only, kept off the content layer */
+  .identity::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, var(--rule-strong) 1px, transparent 1px);
+    background-size: 16px 16px;
+    background-position: 8px 8px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, transparent 60%);
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, transparent 60%);
+  }
+
+  .identity[data-field-live]::before {
+    display: none;
+  }
+
+  .grid {
+    position: relative;
+    display: grid;
+    gap: 0;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .nameplate {
+    font-family: var(--dot);
+    font-weight: 600;
+    font-size: var(--t-display);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    color: var(--ink-0);
+    margin-bottom: 0.75rem;
+  }
+
+  .chars {
+    display: block;
+  }
+
+  .word {
+    display: inline-block;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 0.16em;
+    height: 0.16em;
+    margin-left: 0.1em;
+    vertical-align: 0.06em;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  button.dot {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0;
+    border: 0;
+    background: var(--accent);
+    cursor: pointer;
+    position: relative;
+  }
+
+  /* the painted dot is a few pixels across; give it a real hit area
+     without changing where anything sits */
+  button.dot::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+  }
+
+  .role {
+    font-size: var(--t-lead);
+    font-weight: 300;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--ink-1);
+    max-width: 22ch;
+  }
+
+  .plate {
+    position: relative;
+    margin: 1.75rem 0 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .plate img {
+    width: 5.5rem;
+    height: 5.5rem;
+    border: 1px solid var(--rule-strong);
+    filter: grayscale(1) contrast(1.05);
+    background: var(--surface);
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .raster {
+    position: absolute;
+    display: none;
+    pointer-events: none;
+  }
+
+  .plate[data-raster="css"] img {
+    filter: grayscale(1) contrast(2.4) brightness(1.05);
+    -webkit-mask-image: radial-gradient(circle, #000 2.4px, transparent 2.6px);
+    mask-image: radial-gradient(circle, #000 2.4px, transparent 2.6px);
+    -webkit-mask-size: 16px 16px;
+    mask-size: 16px 16px;
+    -webkit-mask-position: var(--mask-x, 0) var(--mask-y, 0);
+    mask-position: var(--mask-x, 0) var(--mask-y, 0);
+  }
+
+  figcaption {
+    color: var(--ink-3);
+  }
+
+  .bio {
+    margin-top: 1.75rem;
+    max-width: 52ch;
+    color: var(--ink-2);
+    font-size: var(--t-sm);
+    line-height: 1.6;
+  }
+
+  .actions {
+    display: none;
+  }
+
+  .specs {
+    margin-top: clamp(2rem, 5vw, 3.25rem);
+  }
+
+  @media (min-width: 48rem) {
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .grid {
+      /* columns match the page frame exactly, so every edge lands on a rule */
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      column-gap: 0;
+      grid-template-areas:
+        "name  name  name  plate"
+        "role  role  .     plate"
+        "bio   bio   .     plate"
+        "act   act   .     plate"
+        "specs specs specs specs";
+      align-items: start;
+    }
+
+    .nameplate,
+    .role,
+    .bio,
+    .actions {
+      padding-right: 2rem;
+    }
+
+    .nameplate {
+      grid-area: name;
+    }
+    .role {
+      grid-area: role;
+      max-width: 28ch;
+    }
+    .plate {
+      grid-area: plate;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.625rem;
+      margin: 0.5rem 0 0;
+    }
+    .plate img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+    }
+
+    figcaption {
+      padding-right: 2rem;
+    }
+    .bio {
+      grid-area: bio;
+    }
+    .actions {
+      grid-area: act;
+      align-self: end;
+    }
+    .specs {
+      grid-area: specs;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ch,
+    .dot {
+      opacity: 0;
+      animation: sg-on 1ms steps(1, end) forwards;
+      animation-delay: calc(var(--i) * 26ms + 90ms);
+    }
+
+    /* cold boot: power down in reverse index order, hold dark, power back up.
+       Both names differ from sg-on on purpose — a CSS animation that keeps its
+       name keeps its start time, so reusing sg-on here would hand the finished
+       power-on a later slot in the list and it would fill over the power-down. */
+    .chars.sg-reboot .ch,
+    .chars.sg-reboot .dot {
+      opacity: 1;
+      animation:
+        sg-boot-off 1ms steps(1, end) forwards calc((var(--n) - 1 - var(--i)) * 26ms),
+        sg-boot-on 1ms steps(1, end) forwards calc((var(--i) + var(--n) - 1) * 26ms + 200ms);
+    }
+  }
+
+  @keyframes sg-on {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes sg-boot-off {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes sg-boot-on {
+    to {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function initColdBoot() {
+    try {
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      const nameplate = document.querySelector("#identity .nameplate");
+      const chars = nameplate?.querySelector(".chars");
+      if (!nameplate || !chars) return;
+
+      nameplate.addEventListener("click", (event) => {
+        if (event.target.closest("button")) return;
+
+        const n =
+          parseInt(getComputedStyle(chars).getPropertyValue("--n"), 10) ||
+          chars.querySelectorAll(".ch").length + 1;
+        const duration = (n - 1) * 26 + (n - 1) * 26 + 200 + 1;
+
+        /* remove, flush, re-add: the flush is what cancels the previous run.
+           The class then stays on — dropping it would restore the page-load
+           power-on and replay it as a second, unwanted flash. */
+        chars.classList.remove("sg-reboot");
+        void chars.offsetWidth;
+        chars.classList.add("sg-reboot");
+
+        /* the indicator's own animation outranks CSS, so tell it to stand
+           down for the sequence — otherwise the dot ignores the reboot */
+        chars.dispatchEvent(
+          new CustomEvent("sg:reboot", { detail: { duration }, bubbles: true })
+        );
+      });
+    } catch (_) {}
+  })();
+</script>
+
+<script is:inline>
+  (function initStatusDot() {
+    try {
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      const dot = document.querySelector("#identity .chars .dot");
+      if (!dot || dot.tagName === "BUTTON") return;
+
+      const i = dot.style.getPropertyValue("--i");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      /* carry the class list across verbatim: it holds Astro's scope hash,
+         and a hand-written "dot" would match none of this file's styles */
+      btn.className = dot.className;
+      btn.setAttribute("aria-label", "Status indicator");
+      if (i) btn.style.setProperty("--i", i);
+      dot.replaceWith(btn);
+
+      const UNIT = 200;
+      const TOTAL = 24;
+      const SEGMENTS = [
+        [0, 1],
+        [1, 0],
+        [2, 1],
+        [5, 0],
+        [6, 1],
+        [7, 0],
+        [10, 1],
+        [11, 0],
+        [12, 1],
+        [15, 0],
+        [16, 1],
+        [17, 0],
+      ];
+
+      let anim = null;
+      let state = 0;
+
+      function cancelAnim() {
+        if (anim) {
+          anim.cancel();
+          anim = null;
+        }
+      }
+
+      function solid() {
+        cancelAnim();
+        /* hand opacity back to CSS so the dot still powers on with the
+           nameplate; an inline value would pin it through the cold boot */
+        btn.style.removeProperty("opacity");
+      }
+
+      function breathe() {
+        cancelAnim();
+        anim = btn.animate([{ opacity: 1 }, { opacity: 0.28 }, { opacity: 1 }], {
+          duration: 3200,
+          iterations: Infinity,
+          easing: "ease-in-out",
+        });
+      }
+
+      function morse() {
+        cancelAnim();
+        const frames = SEGMENTS.map(([at, on]) => ({
+          opacity: on ? 1 : 0,
+          offset: at / TOTAL,
+          easing: "steps(1, end)",
+        }));
+        frames.push({ opacity: 0, offset: 1 });
+        anim = btn.animate(frames, { duration: TOTAL * UNIT, iterations: Infinity });
+      }
+
+      const modes = [solid, breathe, morse];
+      let resumeTimer = 0;
+
+      btn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        state = (state + 1) % modes.length;
+        modes[state]();
+      });
+
+      /* a re-initialising device drops its signal and picks it up again */
+      document.addEventListener("sg:reboot", (event) => {
+        if (state === 0) return;
+        cancelAnim();
+        clearTimeout(resumeTimer);
+        const wait = (event.detail && event.detail.duration) || 800;
+        resumeTimer = setTimeout(() => modes[state](), wait + 40);
+      });
+    } catch (_) {}
+  })();
+</script>
+
+<script is:inline>
+  (function initHalftone() {
+    try {
+      const identity = document.querySelector("#identity.identity");
+      const plate = identity?.querySelector("figure.plate");
+      const img = plate?.querySelector("img");
+      const canvas = plate?.querySelector("canvas.raster");
+      const caption = plate?.querySelector("[data-caption]");
+      if (!identity || !plate || !img || !canvas || !caption) return;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const CELL = 16;
+      const RMAX = 7;
+      const DITHER = 0.12;
+      const BAYER = [
+        [0, 8, 2, 10],
+        [12, 4, 14, 6],
+        [3, 11, 1, 9],
+        [15, 7, 13, 5],
+      ];
+      const RASTER_CAPTION = "Fig. 01a — operator, rasterised";
+      const defaultCaption = caption.textContent || "";
+      const BORDER = 1;
+
+      let rasterOn = false;
+      let rasterMode = null;
+      let pressTimer = 0;
+      let pressOrigin = null;
+      let suppressDbl = false;
+
+      function luminance(hex) {
+        const h = hex.replace("#", "");
+        const full = h.length === 3 ? h.replace(/./g, (d) => d + d) : h;
+        if (full.length < 6) return null;
+        const v = parseInt(full.slice(0, 6), 16);
+        if (isNaN(v)) return null;
+        return (
+          (0.2126 * ((v >> 16) & 255) + 0.7152 * ((v >> 8) & 255) + 0.0722 * (v & 255)) / 255
+        );
+      }
+
+      function palette() {
+        const cs = getComputedStyle(identity);
+        const surface = cs.getPropertyValue("--surface").trim() || "#fff";
+        const ink = cs.getPropertyValue("--ink-1").trim() || "#000";
+        return {
+          surface,
+          ink,
+          surfaceL: luminance(surface),
+          inkL: luminance(ink),
+        };
+      }
+
+      function imgBoxInIdentity() {
+        const ir = identity.getBoundingClientRect();
+        const imgr = img.getBoundingClientRect();
+        return {
+          left: imgr.left - ir.left + BORDER,
+          top: imgr.top - ir.top + BORDER,
+          width: imgr.width - BORDER * 2,
+          height: imgr.height - BORDER * 2,
+        };
+      }
+
+      function maskPhase(box) {
+        const maskX = ((16 - (box.left % 16) + 8) % 16) + "px";
+        const maskY = ((16 - (box.top % 16) + 8) % 16) + "px";
+        plate.style.setProperty("--mask-x", maskX);
+        plate.style.setProperty("--mask-y", maskY);
+      }
+
+      function layoutCanvas() {
+        const w = img.offsetWidth - BORDER * 2;
+        const h = img.offsetHeight - BORDER * 2;
+        canvas.style.top = img.offsetTop + BORDER + "px";
+        canvas.style.left = img.offsetLeft + BORDER + "px";
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+        maskPhase(imgBoxInIdentity());
+      }
+
+      function paintRaster() {
+        if (img.naturalWidth === 0) return false;
+
+        layoutCanvas();
+
+        const cssW = img.offsetWidth - BORDER * 2;
+        const cssH = img.offsetHeight - BORDER * 2;
+        if (cssW <= 0 || cssH <= 0) return false;
+
+        const dpr = Math.min(window.devicePixelRatio || 1, 3);
+        canvas.width = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const box = imgBoxInIdentity();
+        const cMin = Math.ceil(box.left / CELL);
+        const cMax = Math.floor((box.left + box.width) / CELL);
+        const rMin = Math.ceil(box.top / CELL);
+        const rMax = Math.floor((box.top + box.height) / CELL);
+        const cols = cMax - cMin + 1;
+        const rows = rMax - rMin + 1;
+        if (cols <= 0 || rows <= 0) return false;
+
+        let sample;
+        try {
+          const off = document.createElement("canvas");
+          off.width = cols;
+          off.height = rows;
+          const octx = off.getContext("2d");
+          if (!octx) return false;
+          octx.drawImage(img, 0, 0, cols, rows);
+          sample = octx.getImageData(0, 0, cols, rows).data;
+        } catch (_) {
+          return false;
+        }
+
+        const lum = new Float32Array(cols * rows);
+        let lo = 1;
+        let hi = 0;
+        for (let j = 0; j < rows; j++) {
+          for (let i = 0; i < cols; i++) {
+            const k = (j * cols + i) * 4;
+            const v = 0.2126 * sample[k] + 0.7152 * sample[k + 1] + 0.0722 * sample[k + 2];
+            const n = v / 255;
+            lum[j * cols + i] = n;
+            if (n < lo) lo = n;
+            if (n > hi) hi = n;
+          }
+        }
+        const span = hi - lo || 1;
+
+        /* the canvas is still display:none on the first paint, and a hidden
+           element measures as a zero rect — take the offset from the img box
+           we already measured, which is where the canvas gets placed anyway */
+        const canvasLeft = box.left;
+        const canvasTop = box.top;
+        const { surface, ink, surfaceL, inkL } = palette();
+
+        /* how much ink a cell needs to reproduce its tone against the ground.
+           Reading it off the two colours rather than assuming a dark page is
+           what makes the same code correct in both themes: on black the big
+           dots are the highlights, on off-white they are the shadows. */
+        const sL = surfaceL === null ? 1 : surfaceL;
+        const iL = inkL === null ? 0 : inkL;
+        const reach = iL - sL;
+        const coverage = (n) =>
+          reach === 0 ? 0 : Math.min(1, Math.max(0, (n - sL) / reach));
+
+        ctx.fillStyle = surface;
+        ctx.fillRect(0, 0, cssW, cssH);
+        ctx.fillStyle = ink;
+
+        for (let j = 0; j < rows; j++) {
+          for (let i = 0; i < cols; i++) {
+            let n = (lum[j * cols + i] - lo) / span;
+            n += (BAYER[j % 4][i % 4] / 16 - 0.5) * DITHER;
+            const radius = RMAX * Math.sqrt(coverage(n));
+            if (radius < 0.4) continue;
+
+            const cx = CELL * (cMin + i) - canvasLeft;
+            const cy = CELL * (rMin + j) - canvasTop;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        return true;
+      }
+
+      function showRaster() {
+        layoutCanvas();
+        let ok = false;
+        try {
+          ok = paintRaster();
+        } catch (_) {
+          ok = false;
+        }
+
+        if (ok) {
+          /* the canvas ground is opaque and sits inside the 1px border, so it
+             covers the photo without taking the plate's frame with it */
+          rasterMode = "canvas";
+          plate.dataset.raster = "canvas";
+          canvas.style.display = "block";
+        } else {
+          rasterMode = "css";
+          plate.dataset.raster = "css";
+          canvas.style.display = "none";
+          maskPhase(imgBoxInIdentity());
+        }
+        caption.textContent = RASTER_CAPTION;
+        rasterOn = true;
+      }
+
+      function hideRaster() {
+        rasterOn = false;
+        rasterMode = null;
+        delete plate.dataset.raster;
+        canvas.style.display = "none";
+        caption.textContent = defaultCaption;
+      }
+
+      function toggleRaster() {
+        if (rasterOn) hideRaster();
+        else showRaster();
+      }
+
+      function cancelPress() {
+        clearTimeout(pressTimer);
+        pressTimer = 0;
+        pressOrigin = null;
+      }
+
+      img.addEventListener("pointerdown", (event) => {
+        pressOrigin = { x: event.clientX, y: event.clientY };
+        clearTimeout(pressTimer);
+        pressTimer = setTimeout(() => {
+          pressTimer = 0;
+          suppressDbl = true;
+          setTimeout(() => {
+            suppressDbl = false;
+          }, 400);
+          toggleRaster();
+        }, 500);
+      });
+
+      img.addEventListener("pointerup", cancelPress);
+      img.addEventListener("pointercancel", cancelPress);
+      img.addEventListener("contextmenu", cancelPress);
+      img.addEventListener("pointerleave", cancelPress);
+      img.addEventListener("pointermove", (event) => {
+        if (!pressOrigin) return;
+        const dx = event.clientX - pressOrigin.x;
+        const dy = event.clientY - pressOrigin.y;
+        if (Math.hypot(dx, dy) > 10) cancelPress();
+      });
+
+      img.addEventListener("dblclick", () => {
+        if (suppressDbl) return;
+        toggleRaster();
+      });
+
+      if (img.complete && img.naturalWidth > 0) layoutCanvas();
+      else img.addEventListener("load", layoutCanvas, { once: true });
+
+      const ro = new ResizeObserver(() => {
+        layoutCanvas();
+        if (rasterOn && rasterMode === "canvas") {
+          try {
+            paintRaster();
+          } catch (_) {}
+        }
+      });
+      ro.observe(img);
+    } catch (_) {}
+  })();
+</script>
+
+<script is:inline>
+  (function initLampTest() {
+    try {
+      const chars = document.querySelector("#identity .chars");
+      const plate = document.querySelector("#identity figure.plate");
+      const caption = plate?.querySelector("[data-caption]");
+      if (!chars || !plate || !caption) return;
+
+      const HOLD_MS = 1500;
+      const LAMP_CAPTION = "Fig. 01 — lamp test";
+
+      let pressTimer = 0;
+      let pressOrigin = null;
+      let lampActive = false;
+      let savedCaption = null;
+      let suppressClick = false;
+      let releaseBound = false;
+
+      function rasterOn() {
+        return Boolean(plate.dataset.raster);
+      }
+
+      function cancelPress() {
+        clearTimeout(pressTimer);
+        pressTimer = 0;
+        pressOrigin = null;
+      }
+
+      function unbindRelease() {
+        if (!releaseBound) return;
+        releaseBound = false;
+        document.removeEventListener("pointerup", onRelease);
+        document.removeEventListener("pointercancel", onRelease);
+      }
+
+      function onRelease() {
+        cancelPress();
+        if (lampActive) endLamp();
+        unbindRelease();
+      }
+
+      function bindRelease() {
+        if (releaseBound) return;
+        releaseBound = true;
+        document.addEventListener("pointerup", onRelease);
+        document.addEventListener("pointercancel", onRelease);
+      }
+
+      function startLamp() {
+        if (lampActive) return;
+        lampActive = true;
+        if (!rasterOn()) {
+          savedCaption = caption.textContent;
+          caption.textContent = LAMP_CAPTION;
+        }
+        document.dispatchEvent(new CustomEvent("sg:field", { detail: { mode: "lamp" } }));
+      }
+
+      function endLamp() {
+        if (!lampActive) return;
+        lampActive = false;
+        if (!rasterOn() && savedCaption !== null) {
+          caption.textContent = savedCaption;
+        }
+        savedCaption = null;
+        document.dispatchEvent(new CustomEvent("sg:field", { detail: { restore: true } }));
+      }
+
+      chars.addEventListener(
+        "click",
+        (event) => {
+          if (!suppressClick) return;
+          if (!event.target.closest(".dot")) return;
+          event.preventDefault();
+          event.stopPropagation();
+          suppressClick = false;
+        },
+        true
+      );
+
+      chars.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        const dot = event.target.closest(".dot");
+        if (!dot || !chars.contains(dot)) return;
+
+        pressOrigin = { x: event.clientX, y: event.clientY };
+        clearTimeout(pressTimer);
+        bindRelease();
+        pressTimer = window.setTimeout(() => {
+          pressTimer = 0;
+          suppressClick = true;
+          window.setTimeout(() => {
+            suppressClick = false;
+          }, 400);
+          startLamp();
+        }, HOLD_MS);
+      });
+
+      chars.addEventListener("pointermove", (event) => {
+        if (!pressOrigin || lampActive) return;
+        const dx = event.clientX - pressOrigin.x;
+        const dy = event.clientY - pressOrigin.y;
+        if (Math.hypot(dx, dy) > 10) {
+          cancelPress();
+          unbindRelease();
+        }
+      });
+
+      chars.addEventListener("pointerleave", () => {
+        cancelPress();
+        if (lampActive) endLamp();
+        unbindRelease();
+      });
+
+      chars.addEventListener("contextmenu", () => {
+        cancelPress();
+        if (lampActive) endLamp();
+        unbindRelease();
+      });
+    } catch (_) {}
+  })();
+</script>
