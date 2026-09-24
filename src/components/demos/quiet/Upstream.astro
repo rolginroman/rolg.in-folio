@@ -1,0 +1,42 @@
+---
+import { upstream, upstreamStats } from "../../../data/profile";
+import Entry from "./Entry.astro";
+
+const KIND_LABEL = { issue: "Issue", pr: "Pull request" } as const;
+
+const entries = upstream.map((report) => ({
+  title: `${report.repo} #${report.number}`,
+  href: report.link,
+  summary: report.title,
+  meta: [KIND_LABEL[report.kind], String(report.year)],
+}));
+---
+
+<p class="figures q-num">
+  <span class="count">{upstreamStats.pullRequestsMerged}</span> merged, out of
+  <span class="count">{upstreamStats.pullRequestsAuthored}</span> pull requests authored outside my own
+  repositories since {upstreamStats.sinceYear}. Below: bugs I found in other people's code, and work
+  merged into it.
+</p>
+
+<ul class="list">
+  {entries.map((entry) => <Entry {...entry} />)}
+</ul>
+
+<style lang="scss">
+  .figures {
+    font-size: var(--t-body);
+    line-height: 1.6;
+    color: var(--ink-2);
+    margin-bottom: var(--u6);
+  }
+
+  .count {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .list {
+    display: block;
+  }
+</style>

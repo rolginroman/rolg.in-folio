@@ -1,0 +1,132 @@
+---
+import InlineIcon from "../../InlineIcon.astro";
+
+export interface Props {
+  title: string;
+  /** Where the title goes. Omitted for private work, which is set as plain type. */
+  href?: string;
+  /** Right-hanging facts, set in tabular figures. Joined with a thin separator. */
+  meta?: string[];
+  /** One line: what it is. */
+  summary?: string;
+  /** The detail an engineer stops for. Optional by design — never padding. */
+  detail?: string;
+}
+
+const { title, href, meta = [], summary, detail } = Astro.props;
+---
+
+<li class="entry">
+  <div class="head">
+    {/* No href, no anchor: private work is set as plain type, losing the
+        out-arrow and the underline rather than pretending to be clickable. */}
+    <h3 class="name">
+      {
+        href ? (
+          <a href={href} target="_blank" rel="noopener noreferrer">
+            {title}<InlineIcon name="mdi:arrow-top-right" class="mark" />
+          </a>
+        ) : (
+          title
+        )
+      }
+    </h3>
+    {
+      meta.length > 0 && (
+        <p class="meta q-num">
+          {meta.map((item, index) => (
+            <Fragment>
+              {index > 0 && <span class="sep" aria-hidden="true" />}
+              <span>{item}</span>
+            </Fragment>
+          ))}
+        </p>
+      )
+    }
+  </div>
+  {summary && <p class="summary">{summary}</p>}
+  {detail && <p class="detail">{detail}</p>}
+</li>
+
+<style lang="scss">
+  .entry + .entry {
+    border-top: 1px solid var(--hair);
+    margin-top: var(--u5);
+    padding-top: var(--u5);
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    column-gap: var(--u4);
+    row-gap: var(--u1);
+  }
+
+  .name {
+    font-size: var(--t-title);
+    font-weight: 550;
+    letter-spacing: var(--track-title);
+    line-height: 1.35;
+    color: var(--ink);
+    min-width: 0;
+  }
+
+  .name a {
+    text-decoration-line: none;
+    /* The link target, not the row, is the hit area — so it carries the
+       underline that tells you it is one. */
+    border-bottom: 1px solid transparent;
+  }
+
+  .mark {
+    font-size: 0.72em;
+    margin-left: 0.25em;
+    vertical-align: 0.12em;
+    color: var(--ink-3);
+    transition: color var(--fast) var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .name a:hover {
+      border-bottom-color: var(--ink);
+    }
+
+    .name a:hover .mark {
+      color: var(--ink);
+    }
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: var(--t-micro);
+    font-weight: 450;
+    letter-spacing: 0.01em;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .sep {
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--ink-3);
+    flex: none;
+  }
+
+  .summary {
+    margin-top: var(--u2);
+    font-size: var(--t-small);
+    color: var(--ink-2);
+  }
+
+  .detail {
+    margin-top: var(--u2);
+    font-size: var(--t-small);
+    line-height: 1.65;
+    color: var(--ink-3);
+  }
+</style>

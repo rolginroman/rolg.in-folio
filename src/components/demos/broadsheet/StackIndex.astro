@@ -1,0 +1,235 @@
+---
+import SectionHead from "./SectionHead.astro";
+import type { TechGroup } from "../../../data/profile";
+import { techGroups, tech } from "../../../data/profile";
+
+// The group the data bothered to annotate is the group that needs explaining,
+// so that one runs as the lead block and the rest set as a ruled index. Derived
+// rather than pinned to a position, so re-grouping the stack re-ranks the page.
+const annotated = (group: TechGroup) =>
+  group.items.filter((item) => item.note).length / group.items.length;
+
+const ranked = [...techGroups].sort((a, b) => annotated(b) - annotated(a));
+const leadLabel = ranked[0]?.label;
+
+// Filtering back over the source keeps the index in its authored order.
+const featured = techGroups.filter((group) => group.label === leadLabel);
+const index = techGroups.filter((group) => group.label !== leadLabel);
+
+const tally = (group: TechGroup) => String(group.items.length).padStart(2, "0");
+---
+
+<section class="stack" id="stack" aria-labelledby="stack-title">
+  <SectionHead label="The index" folio={`${tech.length} entries`} />
+  <h2 class="stack__title" id="stack-title">What I work in</h2>
+
+  {
+    featured.map((group) => (
+      <div class="lede">
+        <h3 class="lede__head">
+          <span>{group.label}</span>
+          <span class="lede__count">{tally(group)}</span>
+        </h3>
+        <dl class="lede__list">
+          {group.items.map((item) => (
+            <div class="entry">
+              <dt class="entry__name">{item.name}</dt>
+              <dd class="entry__note">{item.note}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    ))
+  }
+
+  <div class="stack__table">
+    {
+      index.map((group) => (
+        <div class="stack__col">
+          <h3 class="stack__col-head">
+            <span>{group.label}</span>
+            <span class="stack__count">{tally(group)}</span>
+          </h3>
+          <ul class="stack__list">
+            {group.items.map((item) => (
+              <li class="stack__item">
+                <span class="stack__name">{item.name}</span>
+                <span class="stack__gloss">{item.note}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .stack {
+    padding-top: clamp(2.75rem, 7vw, 4.5rem);
+  }
+
+  .stack__title {
+    @include optical(36, 400);
+    font-size: clamp(1.75rem, 4.4vw, 2.6rem);
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+    padding-bottom: clamp(1rem, 2.6vw, 1.5rem);
+  }
+
+  // The lead block: one group set at reading size with its glosses beside it.
+  .lede {
+    border-top: 2px solid $ink;
+  }
+
+  .lede__head,
+  .stack__col-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    @include furniture(0.625rem);
+    letter-spacing: 0.16em;
+  }
+
+  .lede__head {
+    padding: 0.7rem 0 0.75rem;
+    border-bottom: 1px solid $ink;
+  }
+
+  .lede__count,
+  .stack__count {
+    color: $spot;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .entry {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid $rule;
+
+    @include bp(46rem) {
+      grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+      column-gap: 1.75rem;
+      align-items: baseline;
+      padding: 0.8rem 0;
+    }
+  }
+
+  .entry__name {
+    @include optical(24, 400);
+    font-size: clamp(1.1rem, 2.4vw, 1.3rem);
+    line-height: 1.24;
+    letter-spacing: -0.016em;
+  }
+
+  // Empty on the entries that need no gloss; a blank cell in a ruled table is
+  // still a table, which is why this is a table and not a set of cards.
+  .entry__note {
+    @include optical(16, 400);
+    font-size: 0.9375rem;
+    line-height: 1.58;
+    color: $ink-soft;
+    margin: 0;
+    max-width: 62ch;
+    text-wrap: pretty;
+
+    &:empty {
+      display: none;
+    }
+
+    @include bp(46rem) {
+      &:empty {
+        display: block;
+      }
+    }
+  }
+
+  // The remaining groups run as a boxed index, one column each.
+  .stack__table {
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+    background: $paper-deep;
+    border: 1px solid $rule;
+    border-top: 2px solid $ink;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    @include bp(46rem) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .stack__col {
+    padding: 0.9rem 1rem 1.1rem;
+    border-left: 1px solid $rule;
+
+    &:first-child {
+      border-left: 0;
+    }
+
+    // Three groups into two tracks leaves a hole, so the last one takes the
+    // full width and sets its own run in two columns rather than one long list.
+    &:last-child {
+      grid-column: 1 / -1;
+      border-left: 0;
+      border-top: 1px solid $rule;
+    }
+
+    @include bp(46rem) {
+      border-top: 0;
+
+      &:last-child {
+        grid-column: auto;
+        border-left: 1px solid $rule;
+      }
+    }
+  }
+
+  .stack__col:last-child .stack__list {
+    columns: 2;
+    column-gap: 1.25rem;
+
+    @include bp(46rem) {
+      columns: 1;
+    }
+  }
+
+  .stack__col-head {
+    padding-bottom: 0.55rem;
+    margin-bottom: 0.6rem;
+    border-bottom: 1px solid $ink;
+  }
+
+  .stack__item {
+    padding: 0.18rem 0;
+    break-inside: avoid;
+  }
+
+  .stack__name {
+    @include optical(14, 400);
+    display: block;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: $ink;
+  }
+
+  .stack__gloss {
+    @include optical(12, 400);
+    display: block;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: $ink-soft;
+    padding: 0.1rem 0 0.25rem 0.7rem;
+    border-left: 1px solid $rule;
+    margin-left: 0.05rem;
+    max-width: 40ch;
+    text-wrap: pretty;
+
+    &:empty {
+      display: none;
+    }
+  }
+</style>

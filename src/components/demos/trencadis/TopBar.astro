@@ -1,0 +1,132 @@
+---
+// The two exits, pinned. Nothing else earns a place here.
+import InlineIcon from "../../InlineIcon.astro";
+import { identity, links } from "../../../data/profile";
+import Shard from "./Shard.astro";
+---
+
+<header class="bar">
+  <a class="bar__mark" href="#top">
+    <span class="bar__glyph" aria-hidden="true">RR</span>
+    <span class="bar__name">{identity.fullName}</span>
+  </a>
+  <nav class="bar__exits" aria-label="Primary actions">
+    <Shard
+      as="a"
+      tone="terra"
+      cut={3}
+      class="bar__exit bar__exit--cv"
+      href={links.cv}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <InlineIcon name="mdi:tray-arrow-down" class="bar__icon" aria-hidden="true" />
+      <span>Download CV</span>
+    </Shard>
+    <Shard as="a" tone="bone" cut={5} class="bar__exit" href={`mailto:${links.mail}`}>
+      <InlineIcon name="mdi:email-outline" class="bar__icon" aria-hidden="true" />
+      <span class="bar__exit-label">E-mail</span>
+    </Shard>
+    <Shard as="a" tone="cobalt" cut={2} class="bar__exit" href={links.telegram} target="_blank" rel="noopener noreferrer">
+      <InlineIcon name="mdi:telegram" class="bar__icon" aria-hidden="true" />
+      <span class="bar__exit-label">Telegram</span>
+    </Shard>
+  </nav>
+</header>
+
+<style lang="scss">
+  @use "demos/trencadis/world" as w;
+
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem clamp(1rem, 4vw, 2.75rem);
+    background: var(--tc-grout);
+    border-bottom: 1px solid var(--tc-iron-line);
+    box-shadow: 0 6px 18px -10px hsl(20 40% 2% / 0.9);
+  }
+
+  .bar__mark {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    color: var(--tc-bone);
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .bar__glyph {
+    font-family: var(--tc-display);
+    font-size: 1.15rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--tc-ochre-mark);
+  }
+
+  .bar__name {
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tc-bone-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar__exits {
+    display: flex;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .bar__exit {
+    // Shard renders the tag; this styles its body slot.
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+
+    :global(.shard__body) {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
+    }
+  }
+
+  .bar__icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+  }
+
+  @media (max-width: 34rem) {
+    .bar__name {
+      display: none;
+    }
+
+    .bar__exit-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .bar__exit :global(.shard__body) {
+      padding: 0.5rem 0.7rem;
+    }
+
+    .bar__exit--cv :global(.shard__body) {
+      padding-inline: 0.85rem;
+    }
+  }
+</style>

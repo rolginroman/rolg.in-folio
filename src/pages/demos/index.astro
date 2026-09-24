@@ -1,0 +1,128 @@
+---
+const demos = [
+  {
+    slug: "signal",
+    name: "Signal",
+    idea: "Nothing-style industrial minimalism: dot-matrix type, monochrome surfaces, one red accent, glyph-driven.",
+  },
+  {
+    slug: "broadsheet",
+    name: "Broadsheet",
+    idea: "Editorial print: large serif display, hairline rules, a real typographic grid, the CV read as a front page.",
+  },
+  {
+    slug: "trencadis",
+    name: "Trencadís",
+    idea: "Barcelona modernista: broken-tile mosaic geometry, warm ceramic palette, the stack rendered as a facade.",
+  },
+  {
+    slug: "quiet",
+    name: "Quiet",
+    idea: "Contemporary product minimalism: one typeface, no chroma, a hanging label rail and a single measured column.",
+  },
+  {
+    slug: "ledger",
+    name: "Ledger",
+    idea: "The CV as a catalogue: numbered rows on one shared grid, dot leaders, tabular metadata, detail deferred to hover.",
+  },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Design demos — rolg.in</title>
+  </head>
+  <body>
+    <main>
+      <h1>Design demos</h1>
+      <p class="lede">Five directions for rolg.in. Same facts, five visual worlds.</p>
+      <ul>
+        {
+          demos.map((demo) => (
+            <li>
+              <a href={`/demos/${demo.slug}`}>
+                <span class="name">{demo.name}</span>
+                <span class="idea">{demo.idea}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="back"><a href="/">&larr; current site</a></p>
+    </main>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        background: #0b0b0c;
+        color: #f2f2f2;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Inter", sans-serif;
+      }
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 12vh 1.5rem 6rem;
+      }
+      h1 {
+        font-size: clamp(2rem, 6vw, 3rem);
+        letter-spacing: -0.03em;
+        margin: 0;
+      }
+      .lede {
+        color: #9a9a9e;
+        margin: 0.75rem 0 3rem;
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 1px;
+        background: #26262a;
+        border-block: 1px solid #26262a;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      li a {
+        display: grid;
+        gap: 0.4rem;
+        padding: 1.5rem 0.25rem;
+        background: #0b0b0c;
+        transition: background 0.15s ease;
+      }
+      li a:hover,
+      li a:focus-visible {
+        background: #151518;
+      }
+      .name {
+        font-size: 1.35rem;
+        letter-spacing: -0.02em;
+      }
+      .idea {
+        color: #9a9a9e;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+      .back {
+        margin-top: 3rem;
+        color: #6f6f75;
+      }
+      .back a {
+        text-decoration: underline;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </body>
+</html>

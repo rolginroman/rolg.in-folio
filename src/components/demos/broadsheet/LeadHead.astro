@@ -1,0 +1,34 @@
+---
+import { bio, identity } from "../../../data/profile";
+
+const [standfirst] = bio;
+---
+
+<div class="lead-head">
+  <h2 class="lead__headline">{identity.tagline}</h2>
+  <p class="lead__standfirst">{standfirst}</p>
+</div>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .lead__headline {
+    @include optical(72, 400);
+    font-size: clamp(2.9rem, 9.5vw, 5.25rem);
+    line-height: 0.95;
+    letter-spacing: -0.032em;
+    padding: clamp(1.25rem, 3.5vw, 2rem) 0 0;
+    text-wrap: balance;
+    max-width: 14ch;
+  }
+
+  .lead__standfirst {
+    @include optical(28, 400);
+    font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+    line-height: 1.32;
+    letter-spacing: -0.006em;
+    max-width: 38ch;
+    padding: clamp(0.9rem, 2.4vw, 1.35rem) 0 0;
+    text-wrap: pretty;
+  }
+</style>

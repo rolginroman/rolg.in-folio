@@ -1,0 +1,117 @@
+---
+import { identity, bio, careerStartYear } from "../../../data/profile";
+
+/** The register's own record: what it covers, and over what span. */
+const span = `${careerStartYear}–${new Date().getFullYear()}`;
+const [lead, ...rest] = bio;
+---
+
+<header class="masthead led-sub">
+  <p class="banner led-full">
+    <span class="banner-left">{identity.domain} &mdash; index of work</span>
+    <span class="banner-right">{span}</span>
+  </p>
+
+  <h1 class="name led-full">{identity.fullName}</h1>
+
+  <p class="tagline led-full">{identity.tagline}</p>
+
+  <p class="standing led-full">
+    <span>{identity.role}</span>
+    <span class="sep" aria-hidden="true">/</span>
+    <span>{identity.location}</span>
+    <span class="sep" aria-hidden="true">/</span>
+    <span>@{identity.handle}</span>
+  </p>
+
+  <div class="bio led-full led-prose">
+    <p class="bio-lead">{lead}</p>
+    {rest.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+</header>
+
+<style lang="scss">
+  .masthead {
+    padding-block: var(--u6) var(--u2);
+  }
+
+  .banner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--u2) var(--u4);
+    padding-block-end: var(--u3);
+    border-bottom: 1px solid var(--ink);
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-label);
+    font-weight: 500;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  .banner-right {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+  }
+
+  .name {
+    margin-block-start: var(--u6);
+    font-size: var(--t-display);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: var(--track-display);
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .tagline {
+    margin-block-start: var(--u3);
+    font-size: var(--t-lead);
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: var(--track-lead);
+    color: var(--ink-2);
+  }
+
+  .standing {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin-block-start: var(--u4);
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-meta);
+    letter-spacing: var(--track-meta);
+    color: var(--ink-3);
+  }
+
+  .sep {
+    color: var(--ink-3);
+  }
+
+  .bio {
+    display: grid;
+    gap: var(--u3);
+    margin-block-start: var(--u5);
+    font-size: var(--t-small);
+    line-height: 1.7;
+    color: var(--ink-2);
+  }
+
+  .bio-lead {
+    font-size: var(--t-body);
+    color: var(--ink);
+  }
+
+  @media (min-width: 48rem) {
+    .masthead {
+      padding-block: var(--u7) var(--u3);
+    }
+
+    .name {
+      margin-block-start: var(--u7);
+    }
+  }
+</style>

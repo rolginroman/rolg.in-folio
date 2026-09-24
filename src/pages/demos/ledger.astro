@@ -1,0 +1,104 @@
+---
+import "../../styles/demos/ledger/base.scss";
+import recursive from "../../styles/demos/ledger/fonts/recursive-latin-MONO-wght.woff2";
+import { identity, seo, tech, projects, upstream, upstreamStats } from "../../data/profile";
+import { channels } from "../../components/demos/ledger/channels";
+import Masthead from "../../components/demos/ledger/Masthead.astro";
+import Contents from "../../components/demos/ledger/Contents.astro";
+import Section from "../../components/demos/ledger/Section.astro";
+import Stack from "../../components/demos/ledger/Stack.astro";
+import Work from "../../components/demos/ledger/Work.astro";
+import WorkNote from "../../components/demos/ledger/WorkNote.astro";
+import Upstream from "../../components/demos/ledger/Upstream.astro";
+import Contact from "../../components/demos/ledger/Contact.astro";
+import Colophon from "../../components/demos/ledger/Colophon.astro";
+
+const title = `${identity.fullName} — ${identity.role}`;
+
+/** Counted from the data, so the contents can never disagree with the page. */
+const counts = {
+  stack: tech.length,
+  work: projects.length,
+  upstream: upstream.length,
+  contact: channels.length,
+};
+
+const divisions = [
+  { id: "stack", label: "Stack", count: counts.stack },
+  { id: "work", label: "Work", count: counts.work },
+  { id: "upstream", label: "Upstream", count: counts.upstream },
+  { id: "contact", label: "Contact", count: counts.contact },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={seo.description} />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#fcfcfa" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={recursive} as="font" type="font/woff2" crossorigin="anonymous" />
+  </head>
+  <body>
+    <a class="led-skip" href="#main">Skip to content</a>
+    <main id="main" class="led-wrap led-grid">
+      <Masthead />
+      <Contents divisions={divisions} />
+
+      <Section id="stack" label="Stack" count={counts.stack}>
+        <Fragment slot="lead">
+          <p>
+            Every entry is backed by public evidence: a merged pull request, a shipped repository,
+            or a filed issue. The trailing column is the cluster it belongs to.
+          </p>
+        </Fragment>
+        <Stack />
+      </Section>
+
+      <Section id="work" label="Work" count={counts.work}>
+        <Fragment slot="lead">
+          <p>
+            Ordered by what earns attention fastest, not by recency. Each row keeps its detail
+            behind it.
+          </p>
+        </Fragment>
+        <Work />
+        <Fragment slot="note">
+          <WorkNote />
+        </Fragment>
+      </Section>
+
+      <Section id="upstream" label="Upstream" count={counts.upstream}>
+        <Fragment slot="lead">
+          <p>
+            <span class="figure">{upstreamStats.pullRequestsMerged}</span> merged, out of
+            <span class="figure">{upstreamStats.pullRequestsAuthored}</span> pull requests authored
+            outside my own repositories since {upstreamStats.sinceYear}. Below: bugs found in other
+            people's code, and work merged into it.
+          </p>
+        </Fragment>
+        <Upstream />
+      </Section>
+
+      <Section id="contact" label="Contact" count={counts.contact}>
+        <Contact />
+      </Section>
+    </main>
+    <Colophon />
+
+    <style lang="scss">
+      .figure {
+        font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+        color: var(--ink);
+      }
+    </style>
+  </body>
+</html>

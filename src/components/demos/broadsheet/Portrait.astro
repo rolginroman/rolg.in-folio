@@ -1,0 +1,99 @@
+---
+import { photo, identity } from "../../../data/profile";
+---
+
+<figure class="plate">
+  <!--
+    A gradient map, which is what a duotone plate actually is: the grey ramp is
+    remapped stop by stop from ink-black through the spot ink to the stock, so
+    the spot can only ever land in the midtones. Shadows — hair, brows, eye
+    sockets — resolve to ink and never pick up colour.
+  -->
+  <svg class="plate__inks" aria-hidden="true" focusable="false" width="0" height="0">
+    <filter id="bs-duotone" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0" />
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues="0.0902 0.3059 0.6471 0.9098" />
+        <feFuncG type="table" tableValues="0.0706 0.1176 0.2627 0.8784" />
+        <feFuncB type="table" tableValues="0.0549 0.0824 0.1725 0.8118" />
+      </feComponentTransfer>
+    </filter>
+  </svg>
+  <div class="plate__frame">
+    <picture>
+      <source srcset={photo.largeWebpSrcset} type="image/webp" />
+      <img
+        src={photo.largeSrc}
+        alt={photo.alt}
+        width="640"
+        height="800"
+        decoding="async"
+        fetchpriority="high"
+      />
+    </picture>
+  </div>
+  <figcaption class="plate__caption">
+    <span class="plate__lede">{identity.fullName}</span>, {identity.location}.
+  </figcaption>
+</figure>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .plate__frame {
+    position: relative;
+    isolation: isolate;
+    background: $paper-deep;
+    border: 1px solid $rule;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  .plate__inks {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    // Without the filter this degrades to a plain grey plate, not a broken one.
+    filter: grayscale(1) brightness(0.92) contrast(1.15) url("#bs-duotone");
+  }
+
+  // The screen the plate would have been printed through.
+  .plate__frame > picture::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    opacity: 0.3;
+    background-image: radial-gradient(rgba(23, 18, 14, 0.5) 0.6px, transparent 0.7px);
+    background-size: 3px 3px;
+  }
+
+  picture {
+    display: block;
+    position: static;
+  }
+
+  .plate__caption {
+    @include optical(14, 400);
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: $ink-soft;
+    padding: 0.55rem 0 0;
+    border-bottom: 1px solid $rule;
+    padding-bottom: 0.7rem;
+    max-width: 34ch;
+  }
+
+  .plate__lede {
+    font-style: italic;
+    color: $ink;
+  }
+</style>

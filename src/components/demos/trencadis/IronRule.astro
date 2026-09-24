@@ -1,0 +1,47 @@
+---
+// Wrought-iron line work: the whiplash curl modernista smiths put on gates and
+// balconies, used here as the rule between sections.
+interface Props {
+  id: string;
+  class?: string;
+}
+const { id, class: className } = Astro.props;
+const curl = `tc-curl-${id}`;
+---
+
+<div class:list={["iron", className]} role="presentation">
+  <span class="iron__line"></span>
+  <svg class="iron__motif" viewBox="0 0 240 40" width="240" height="40" aria-hidden="true" focusable="false">
+    <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <path
+        id={curl}
+        d="M0 20 H58 C80 20 84 7 101 9.5 C114 11.5 115.5 26 103 27.5 C94.5 28.5 92.5 19 101.5 17.8"
+      ></path>
+      <use href={`#${curl}`} transform="translate(240 40) rotate(180)"></use>
+    </g>
+    <path d="M120 13.4 L126.6 20 L120 26.6 L113.4 20 Z" fill="var(--tc-terra-mark)"></path>
+  </svg>
+  <span class="iron__line"></span>
+</div>
+
+<style lang="scss">
+  .iron {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    color: var(--tc-iron-line);
+    margin-block: clamp(2.25rem, 5vw, 3.5rem);
+  }
+
+  .iron__line {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, currentColor 22%, currentColor 78%, transparent);
+  }
+
+  .iron__motif {
+    flex: 0 0 auto;
+    width: 15rem;
+    height: 2.5rem;
+  }
+</style>

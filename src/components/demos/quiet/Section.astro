@@ -1,0 +1,31 @@
+---
+export interface Props {
+  id: string;
+  /** The section heading. It lives in the rail, hanging left of the measure. */
+  label: string;
+}
+
+const { id, label } = Astro.props;
+const headingId = `${id}-label`;
+---
+
+<section id={id} class="section" aria-labelledby={headingId}>
+  <div class="q-wrap q-grid">
+    <h2 id={headingId} class="q-label">{label}</h2>
+    <div class="q-col"><slot /></div>
+  </div>
+</section>
+
+<style lang="scss">
+  .section {
+    padding-bottom: var(--section-gap);
+  }
+
+  /* A rule only where it separates meaning: between one section and the next.
+     It stops at the measure, so it reads as part of the column, not a divider
+     laid across the page. */
+  .section > .q-grid {
+    border-top: 1px solid var(--hair);
+    padding-top: var(--section-gap);
+  }
+</style>

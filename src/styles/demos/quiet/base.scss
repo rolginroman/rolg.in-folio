@@ -1,0 +1,257 @@
+/* QUIET — contemporary product minimalism. One typeface, no chroma, no chrome.
+   Self-contained: this world defines its own tokens and owns its font file. */
+
+@font-face {
+  font-family: "Inter Variable";
+  src: url("./fonts/inter-latin-variable-wghtOnly-normal.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+
+  --sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Six type steps, and no more. Weight does the hierarchy work. */
+  --t-display: clamp(2.375rem, 1.55rem + 3.5vw, 3.625rem);
+  --t-lead: clamp(1.1875rem, 1.05rem + 0.6vw, 1.5rem);
+  --t-title: 1.0625rem;
+  --t-body: 1rem;
+  --t-small: 0.875rem;
+  --t-micro: 0.75rem;
+
+  /* Optical size correction: tracking tightens as the size grows. */
+  --track-display: -0.036em;
+  --track-lead: -0.022em;
+  --track-title: -0.014em;
+  --track-body: -0.006em;
+  --track-label: 0.07em;
+
+  /* Paper, three ink steps, two hairlines. No accent: the only loud element
+     on the page is the filled control, and it is loud in ink. */
+  --paper: #fbfbfa;
+  --paper-sunk: #f3f3f0;
+  --ink: #16161a;
+  --ink-2: #3a3a42;
+  --ink-3: #6a6a72;
+  --hair: #e4e4df;
+  --hair-strong: #c9c9c3;
+  --select: #dedcd4;
+  --select-ink: #16161a;
+
+  /* One spacing unit, and the rhythm built from it. */
+  --u1: 0.25rem;
+  --u2: 0.5rem;
+  --u3: 0.75rem;
+  --u4: 1rem;
+  --u5: 1.5rem;
+  --u6: 2rem;
+  --u7: 3rem;
+  --u8: 4rem;
+  --section-gap: clamp(2.75rem, 5.5vw, 4.5rem);
+
+  /* Layout: a hanging label rail and one measured column. */
+  --rail: 8.5rem;
+  --rail-gap: 3rem;
+  --measure: 38rem;
+  --gutter: clamp(1.25rem, 5vw, 2rem);
+  --bar-h: 3.25rem;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --fast: 140ms;
+  --slow: 180ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    /* Not an inversion: the ground stays slightly warm-neutral, the primary
+       ink stops short of pure white, and the hairlines keep their weight. */
+    --paper: #0f0f11;
+    --paper-sunk: #17171a;
+    --ink: #f0f0ee;
+    --ink-2: #c2c2c9;
+    --ink-3: #8e8e98;
+    --hair: #242428;
+    --hair-strong: #3b3b42;
+    --select: #2e2e35;
+    --select-ink: #f0f0ee;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--bar-h) + var(--u5));
+  scrollbar-color: var(--hair-strong) var(--paper);
+  caret-color: var(--ink);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: var(--track-body);
+  font-feature-settings: "cv05" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+figure,
+dl {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--hair-strong);
+  text-underline-offset: 0.2em;
+  transition: color var(--fast) var(--ease-out),
+    text-decoration-color var(--fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    color: var(--ink);
+    text-decoration-color: currentcolor;
+  }
+}
+
+::selection {
+  background: var(--select);
+  color: var(--select-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hair-strong);
+  border: 3px solid var(--paper);
+  border-radius: 6px;
+}
+
+/* ---- shared primitives ---- */
+
+.q-wrap {
+  width: 100%;
+  max-width: calc(var(--rail) + var(--rail-gap) + var(--measure) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* The rail hangs section labels to the left of the measure on wide screens and
+   collapses to a stacked label on narrow ones. One grid serves both. */
+.q-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--u4);
+}
+
+.q-col {
+  min-width: 0;
+  max-width: var(--measure);
+}
+
+.q-label {
+  font-size: var(--t-micro);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.q-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.q-prose {
+  max-width: 66ch;
+}
+
+.q-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 30;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--t-small);
+  font-weight: 500;
+  letter-spacing: var(--track-body);
+  padding: var(--u3) var(--u4);
+  text-decoration: none;
+}
+.q-skip:focus {
+  left: var(--u2);
+  top: var(--u2);
+}
+
+@media (min-width: 64rem) {
+  .q-grid {
+    grid-template-columns: var(--rail) minmax(0, var(--measure));
+    column-gap: var(--rail-gap);
+    align-items: start;
+  }
+
+  .q-grid > .q-label {
+    /* Optical alignment: the label sits on the first text line of the column,
+       not on the box top, so the two read as one baseline. */
+    padding-top: 0.32em;
+    text-align: right;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

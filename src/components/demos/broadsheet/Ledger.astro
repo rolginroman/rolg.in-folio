@@ -1,0 +1,397 @@
+---
+import SectionHead from "./SectionHead.astro";
+import type { Project } from "../../../data/profile";
+import { projects } from "../../../data/profile";
+
+// A front page ranks: two stories above the fold, the rest as ruled briefs.
+// Both leads share one template and differ only by modifier, so a change in
+// the ranking is a change to this slice and nothing else.
+const leads = projects.slice(0, 2);
+const briefs = projects.slice(2);
+
+const kindLabel = (kind: Project["kind"]) => (kind === "work" ? "Contributions" : "My repository");
+
+// `work` is a contribution to someone else's codebase, so it never carries a
+// star count — stars belong to the owner, not the contributor. Private work has
+// no public count either, so the field is simply absent and prints nothing
+// rather than a zero or an `undefined`.
+const tally = (project: Project) =>
+  project.kind === "own" && project.stars ? `${project.stars} stars` : null;
+
+// A dateline is only a dateline if it goes somewhere. Half these entries are
+// private work with no public URL, so they are set as the same story or brief
+// and simply lose the link — the copy is the item, the anchor was only ever a
+// convenience on top of it.
+const linkAttrs = (link?: string) => (link ? { href: link, rel: "noopener", target: "_blank" } : {});
+---
+
+<section class="ledger" id="work" aria-labelledby="ledger-title">
+  <SectionHead label="Selected work" folio={`${projects.length} entries`} />
+  <h2 class="ledger__title" id="ledger-title">The work, and the habit behind it</h2>
+
+  <div class="ledger__fold">
+    {
+      leads.map((project, index) => {
+        const Story = project.link ? "a" : "div";
+
+        return (
+          <article class={`story story--${index === 0 ? "lead" : "second"}`}>
+            <Story class="story__link" {...linkAttrs(project.link)}>
+              <span class="story__mark" aria-hidden="true">
+                {project.mark}
+              </span>
+              <h3 class="story__name">{project.name}</h3>
+              <p class="story__deck">{project.description}</p>
+              {project.detail && <p class="story__detail">{project.detail}</p>}
+              <p class="story__tags">
+                {project.tags.map((tag) => (
+                  <span class="story__tag">{tag}</span>
+                ))}
+              </p>
+              <span class="story__foot">
+                <span>
+                  {project.language} &middot; {kindLabel(project.kind)}
+                </span>
+                <span class="story__num">{project.year}</span>
+              </span>
+            </Story>
+          </article>
+        );
+      })
+    }
+  </div>
+
+  <ol class="briefs">
+    {
+      briefs.map((project) => {
+        const Brief = project.link ? "a" : "div";
+        const stars = tally(project);
+
+        return (
+          <li class="brief">
+            <Brief class="brief__link" {...linkAttrs(project.link)}>
+              <span class="brief__mark" aria-hidden="true">
+                {project.mark}
+              </span>
+              <span class="brief__head">
+                <span class="brief__name">{project.name}</span>
+                <span class="brief__deck">{project.description}</span>
+              </span>
+              <span class="brief__detail">{project.detail}</span>
+              <span class="brief__foot">
+                <span>{project.language}</span>
+                <span class="brief__num">
+                  {project.year}
+                  {stars && <> &middot; {stars}</>}
+                </span>
+              </span>
+            </Brief>
+          </li>
+        );
+      })
+    }
+  </ol>
+</section>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .ledger {
+    padding-top: clamp(2.75rem, 7vw, 4.5rem);
+  }
+
+  .ledger__title {
+    @include optical(36, 400);
+    font-size: clamp(1.75rem, 4.4vw, 2.6rem);
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+    padding-bottom: clamp(1rem, 2.6vw, 1.5rem);
+  }
+
+  // Above the fold: the lead takes two thirds, the second story the rail.
+  .ledger__fold {
+    display: grid;
+    border-top: 2px solid $ink;
+
+    @include bp(52rem) {
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    }
+  }
+
+  .story {
+    border-bottom: 1px solid $rule;
+
+    @include bp(52rem) {
+      border-bottom: 0;
+    }
+  }
+
+  .story--second {
+    @include bp(52rem) {
+      border-left: 1px solid $rule;
+    }
+  }
+
+  .story__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    padding: clamp(1rem, 2.4vw, 1.4rem) 0 clamp(1.25rem, 3vw, 1.75rem);
+    text-decoration: none;
+    transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .story--lead .story__link {
+    @include bp(52rem) {
+      padding-right: 2.25rem;
+    }
+  }
+
+  .story--second .story__link {
+    @include bp(52rem) {
+      padding-left: 1.5rem;
+    }
+  }
+
+  // Only a story that is a link behaves like one. The linkless stories keep the
+  // identical block and simply never light up.
+  a.story__link:hover {
+    background: $paper-deep;
+  }
+
+  // The mark is the only ornament this world allows, and it is set in type.
+  .story__mark {
+    @include optical(72, 500);
+    color: $spot;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    font-feature-settings: "lnum";
+  }
+
+  .story--lead .story__mark {
+    font-size: clamp(2.25rem, 5.5vw, 3.1rem);
+  }
+
+  .story--second .story__mark {
+    font-size: clamp(1.9rem, 4.5vw, 2.35rem);
+  }
+
+  .story__name {
+    @include optical(36, 500);
+    line-height: 1.06;
+    letter-spacing: -0.026em;
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.16em;
+    transition: text-decoration-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .story--lead .story__name {
+    font-size: clamp(1.7rem, 4.4vw, 2.5rem);
+  }
+
+  .story--second .story__name {
+    font-size: clamp(1.4rem, 3.4vw, 1.7rem);
+  }
+
+  a.story__link:hover .story__name,
+  a.story__link:focus-visible .story__name {
+    text-decoration-color: $spot;
+  }
+
+  .story__deck {
+    @include optical(28, 400);
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    line-height: 1.36;
+    letter-spacing: -0.006em;
+    color: $ink;
+    max-width: 44ch;
+    text-wrap: pretty;
+  }
+
+  .story__detail {
+    @include optical(16, 400);
+    font-size: 1rem;
+    line-height: 1.68;
+    color: $ink-soft;
+    max-width: $measure;
+    text-wrap: pretty;
+  }
+
+  // A lead story's deck outranks the rail's. This line carries the strongest
+  // claim on the page, so it gets the size — and the depth it adds is what
+  // keeps the lead column from stopping short of its foot rule.
+  .story--lead .story__deck {
+    font-size: clamp(1.15rem, 2.9vw, 1.75rem);
+    line-height: 1.26;
+    letter-spacing: -0.014em;
+    max-width: 30ch;
+  }
+
+  // The lead's body is set one step up and to a tighter measure, so the story
+  // fills its column instead of stopping short of the foot rule.
+  .story--lead .story__detail {
+    font-size: 1.0625rem;
+    line-height: 1.78;
+    max-width: 56ch;
+  }
+
+  .story__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.55rem;
+    padding-top: 0.15rem;
+  }
+
+  .story__tag {
+    @include furniture(0.5625rem);
+    color: $ink-soft;
+    letter-spacing: 0.13em;
+
+    &:not(:last-child)::after {
+      content: "\00b7";
+      padding-left: 0.55rem;
+      color: $rule;
+    }
+  }
+
+  .story__foot {
+    @include furniture(0.5625rem);
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: $ink-soft;
+    letter-spacing: 0.14em;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid $rule;
+  }
+
+  .story__num {
+    color: $ink;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  // Below the fold: the rest of the entries as a ruled digest, one row each.
+  .briefs {
+    border-top: 2px solid $ink;
+  }
+
+  .brief {
+    border-bottom: 1px solid $rule;
+  }
+
+  .brief__link {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    column-gap: 0.5rem;
+    row-gap: 0.3rem;
+    padding: 0.9rem 0;
+    text-decoration: none;
+    transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    @include bp(52rem) {
+      grid-template-columns: 2.5rem minmax(0, 18rem) minmax(0, 1fr) 10.5rem;
+      column-gap: 1.5rem;
+      align-items: baseline;
+      padding: 1rem 0;
+    }
+  }
+
+  a.brief__link:hover {
+    background: $paper-deep;
+  }
+
+  .brief__mark {
+    @include optical(24, 500);
+    font-size: 1.15rem;
+    line-height: 1.2;
+    color: $spot;
+    letter-spacing: -0.01em;
+  }
+
+  .brief__head {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .brief__name {
+    @include optical(24, 500);
+    font-size: 1.15rem;
+    line-height: 1.2;
+    letter-spacing: -0.018em;
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.16em;
+    transition: text-decoration-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  // The standing rule under a brief's name is this world's link cue, so it is
+  // drawn only inside a brief that is actually an anchor.
+  a.brief__link .brief__name {
+    text-decoration-color: rgba(163, 46, 28, 0.4);
+  }
+
+  a.brief__link:hover .brief__name,
+  a.brief__link:focus-visible .brief__name {
+    text-decoration-color: $spot;
+  }
+
+  .brief__deck {
+    @include optical(16, 400);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: $ink;
+    text-wrap: pretty;
+  }
+
+  // Empty on the entries that have nothing worth adding; a blank cell in a
+  // ruled table is a table, not a broken card.
+  .brief__detail {
+    @include optical(14, 400);
+    font-size: 0.875rem;
+    line-height: 1.62;
+    color: $ink-soft;
+    text-wrap: pretty;
+    grid-column: 2;
+
+    &:empty {
+      display: none;
+    }
+
+    @include bp(52rem) {
+      grid-column: auto;
+
+      &:empty {
+        display: block;
+      }
+    }
+  }
+
+  .brief__foot {
+    @include furniture(0.5625rem);
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: $ink-soft;
+    letter-spacing: 0.13em;
+    grid-column: 2;
+    padding-top: 0.2rem;
+
+    @include bp(52rem) {
+      grid-column: auto;
+      padding-top: 0;
+    }
+  }
+
+  .brief__num {
+    color: $ink;
+    font-variant-numeric: tabular-nums lining-nums;
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,113 @@
+---
+import Rule from "./Rule.astro";
+import { identity, careerStartYear } from "../../../data/profile";
+
+const edition = new Date().toLocaleDateString("en-GB", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+const [given, family] = identity.fullName.split(" ");
+---
+
+<div class="masthead" id="masthead">
+  <Rule weight="heavy" delay={80} />
+  <h1 class="masthead__name">
+    <span>{given}</span>{" "}<span>{family}</span>
+  </h1>
+  <Rule weight="mid" delay={220} />
+  <ul class="dateline">
+    <li class="dateline__cell">{identity.location}</li>
+    <li class="dateline__cell dateline__cell--date">{edition}</li>
+    <li class="dateline__cell">Est. {careerStartYear}</li>
+  </ul>
+  <Rule weight="mid" delay={320} />
+</div>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .masthead {
+    padding-top: clamp(1.75rem, 5vw, 3.25rem);
+  }
+
+  .masthead__name {
+    @include optical(72, 500);
+    font-size: clamp(3.25rem, 24.5vw, 9.5rem);
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    text-align: center;
+    padding: clamp(0.5rem, 2vw, 1.1rem) 0 clamp(0.6rem, 2.2vw, 1.25rem);
+    text-wrap: balance;
+
+    span {
+      display: block;
+    }
+
+    @include bp(46rem) {
+      font-size: clamp(4rem, 15.2vw, 12.25rem);
+      line-height: 0.9;
+
+      span {
+        display: inline;
+      }
+    }
+  }
+
+  .dateline {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .dateline__cell {
+    @include furniture(0.625rem);
+    flex: 1 1 auto;
+    color: $ink-soft;
+    padding: 0.55rem 0.75rem;
+    text-align: center;
+    letter-spacing: 0.15em;
+    border-left: 1px solid $rule;
+
+    &:first-child {
+      border-left: 0;
+      text-align: left;
+      padding-left: 0;
+    }
+
+    &:last-child {
+      text-align: right;
+      padding-right: 0;
+    }
+  }
+
+  .dateline__cell--date {
+    color: $ink;
+    order: -1;
+    flex: 1 0 100%;
+    border-left: 0;
+    padding-inline: 0;
+    padding-bottom: 0.5rem;
+
+    @include bp(46rem) {
+      order: 0;
+      flex: 2 1 14rem;
+      border-left: 1px solid $rule;
+      padding: 0.55rem 0.75rem;
+    }
+  }
+
+  // Below the fold of a phone the three cells stack into two lines, so the
+  // second line needs its own rule to stay a dateline and not a stray row.
+  .dateline__cell:not(.dateline__cell--date) {
+    flex: 1 1 0;
+    border-top: 1px solid $rule;
+    padding-top: 0.5rem;
+
+    @include bp(46rem) {
+      border-top: 0;
+      padding-top: 0.55rem;
+    }
+  }
+</style>

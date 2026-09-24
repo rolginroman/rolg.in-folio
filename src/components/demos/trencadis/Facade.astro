@@ -1,0 +1,299 @@
+---
+// The facade: who he is, at what level, and both exits — before any scrolling.
+// The mosaic appears here only as the archivolt around the portrait and as the
+// tiled jamb at the page edge. The message is on plain grout.
+import InlineIcon from "../../InlineIcon.astro";
+import { bio, identity, links, photo } from "../../../data/profile";
+import Shard from "./Shard.astro";
+
+// The archivolt. A real trencadís band: 12 x 16 broken tiles laid over the
+// whole aperture, with the portrait's own band covering all but the border, so
+// what shows is a mosaic surround and not a drawn frame.
+const lots = ["terra", "bone", "cobalt", "terra", "ochre", "bone", "verd", "terra", "bone", "cobalt", "ochre", "bone"];
+const tesserae = Array.from({ length: 12 * 16 }, (_, i) => ({
+  tone: lots[(i * 5 + Math.floor(i / 12) * 3) % lots.length],
+  cut: ((i * 7 + Math.floor(i / 12)) % 6) + 1,
+  jit: ["0%", "2%", "3.5%", "1%"][(i * 3) % 4],
+}));
+---
+
+<section class="facade" id="top">
+  <div class="facade__text">
+    <h1 class="facade__name">{identity.fullName}</h1>
+    <p class="facade__role">{identity.role}</p>
+    <p class="facade__lead">{bio[0]}</p>
+
+    <div class="facade__actions">
+      <Shard as="a" tone="terra" cut={3} class="act act--lead" href={links.cv} target="_blank" rel="noopener noreferrer">
+        <span class="act__label">Download CV</span>
+        <InlineIcon name="mdi:tray-arrow-down" class="act__icon" aria-hidden="true" />
+      </Shard>
+      <Shard as="a" tone="bone" cut={5} class="act" href={`mailto:${links.mail}?subject=Hi%20Roman%2C%20I%20have%20a%20question.`}>
+        <span class="act__label">Write an e-mail</span>
+        <InlineIcon name="mdi:email-outline" class="act__icon" aria-hidden="true" />
+      </Shard>
+      <Shard as="a" tone="cobalt" cut={2} class="act" href={links.telegram} target="_blank" rel="noopener noreferrer">
+        <span class="act__label">Message on Telegram</span>
+        <InlineIcon name="mdi:telegram" class="act__icon" aria-hidden="true" />
+      </Shard>
+    </div>
+
+    <p class="facade__note">{bio[1]}</p>
+  </div>
+
+  {/*
+    The source photograph is backlit: the ears scatter light and come out of the
+    camera at rgb(217,124,126) — 93 points of red over green, against cheeks at
+    ~30. Beside a terracotta archivolt that reads as a rendering fault.
+
+    The matrix sums to 1 across the row, so greys stay grey, and the curve dips
+    only through the upper-mid reds where the scatter lives, recovering to
+    near-identity at the top so the blown-out ground behind him does not turn
+    green. Ears land near +48, cheeks keep the +22 that makes skin skin, and the
+    lips stay red.
+  */}
+  <svg class="facade__filter" aria-hidden="true" focusable="false" width="0" height="0">
+    <filter id="tc-skin" color-interpolation-filters="sRGB">
+      <feColorMatrix
+        type="matrix"
+        values="0.86 0.10 0.04 0 0
+                0    1    0    0 0
+                0    0    1    0 0
+                0    0    0    1 0"
+      />
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues="0 0.1 0.2 0.3 0.4 0.487 0.545 0.6 0.675 0.82 0.985" />
+      </feComponentTransfer>
+    </filter>
+  </svg>
+
+  <div class="facade__aside">
+    <div class="arch">
+      <div class="arch__ring">
+        <div class="arch__tesserae" aria-hidden="true">
+          {tesserae.map((t) => <span class="tess" data-tone={t.tone} data-cut={t.cut} style={`--jit:${t.jit}`} />)}
+        </div>
+        <div class="arch__band">
+          <picture>
+            <source type="image/webp" srcset={photo.largeWebpSrcset} />
+            <img
+              class="arch__photo"
+              src={photo.largeSrc}
+              alt={photo.alt}
+              width="640"
+              height="800"
+              loading="eager"
+              decoding="async"
+            />
+          </picture>
+        </div>
+      </div>
+    </div>
+
+    <Shard tone="bone" cut={1} class="plaque">
+      <InlineIcon name="mdi:map-marker-outline" class="plaque__pin" aria-hidden="true" />
+      <span class="plaque__place">{identity.location}</span>
+    </Shard>
+  </div>
+</section>
+
+<style lang="scss">
+  @use "demos/trencadis/world" as w;
+
+  .facade {
+    position: relative;
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+    padding-block: clamp(2.5rem, 7vw, 5rem) clamp(2rem, 5vw, 3rem);
+
+    @include w.wall {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      align-items: center;
+      gap: clamp(2.5rem, 5vw, 5rem);
+    }
+  }
+
+  .facade__name {
+    font-family: var(--tc-display);
+    font-weight: 400;
+    font-size: clamp(3rem, 10.5vw, 6rem);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    margin: 0;
+    color: var(--tc-bone);
+    text-wrap: balance;
+  }
+
+  .facade__role {
+    margin: 1.05rem 0 0;
+    font-size: clamp(1rem, 2.4vw, 1.2rem);
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    color: var(--tc-ochre-mark);
+  }
+
+  .facade__lead {
+    margin: 1.1rem 0 0;
+    max-width: 34ch;
+    font-size: clamp(1.15rem, 3.4vw, 1.5rem);
+    line-height: 1.35;
+    color: var(--tc-bone);
+    text-wrap: pretty;
+  }
+
+  // The CV takes its own line; the two conversations share the next one.
+  .facade__actions {
+    display: grid;
+    grid-template-columns: minmax(0, max-content);
+    justify-content: start;
+    gap: 0.6rem;
+    margin-top: clamp(1.5rem, 4vw, 2rem);
+
+    @media (min-width: 30rem) {
+      grid-template-columns: repeat(2, minmax(0, max-content));
+    }
+  }
+
+  .act--lead {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .act {
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    :global(.shard__body) {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.8rem 1.15rem;
+    }
+  }
+
+  .act--lead {
+    font-size: 1rem;
+
+    :global(.shard__body) {
+      padding: 0.95rem 1.5rem;
+    }
+  }
+
+  .act__icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: none;
+  }
+
+  .facade__note {
+    margin: clamp(1.5rem, 4vw, 2.25rem) 0 0;
+    max-width: 62ch;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--tc-bone-dim);
+    text-wrap: pretty;
+  }
+
+  .facade__aside {
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+  }
+
+  .arch {
+    position: relative;
+    width: min(100%, 24rem);
+  }
+
+  // A round-arched aperture — the shape a modernista doorway takes, not a
+  // circular avatar — with a genuine trencadís archivolt laid around it.
+  .arch__ring {
+    --arch-radius: 50% 50% 4% 4% / 38% 38% 3% 3%;
+
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 1.5rem;
+    border-radius: var(--arch-radius);
+    background: var(--tc-grout-2);
+    filter: drop-shadow(0 12px 26px hsl(20 40% 2% / 0.8));
+  }
+
+  .arch__tesserae {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(16, 1fr);
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .tess {
+    --cut-sm: 0.3rem;
+    --cut-lg: 0.5rem;
+
+    display: block;
+    @include w.tones;
+    @include w.glaze;
+    @include w.cuts;
+  }
+
+  .arch__band {
+    position: relative;
+    z-index: 1;
+    padding: 0.4rem;
+    border-radius: var(--arch-radius);
+    background: linear-gradient(158deg, hsl(38 30% 90%), hsl(34 22% 76%));
+    box-shadow:
+      0 0 0 1px hsl(20 40% 6% / 0.55),
+      inset 0 -0.6rem 1rem -0.8rem hsl(20 40% 10% / 0.5);
+  }
+
+  .facade__filter {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .arch__photo {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: url("#tc-skin");
+    border-radius: var(--arch-radius);
+    background: var(--tc-grout-2);
+    box-shadow:
+      inset 0 0 0 1px hsl(20 40% 6% / 0.5),
+      0 4px 10px -6px hsl(20 40% 2% / 0.8);
+  }
+
+  // Barcelona's street plaques are ceramic. So is this one.
+  .plaque {
+    width: min(100%, 24rem);
+
+    :global(.shard__body) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.1rem 0.8rem;
+    }
+  }
+
+  .plaque__pin {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+    color: hsl(12 56% 37%);
+  }
+
+  .plaque__place {
+    font-family: var(--tc-display);
+    font-size: 1.35rem;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+</style>

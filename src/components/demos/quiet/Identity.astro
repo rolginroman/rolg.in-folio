@@ -1,0 +1,131 @@
+---
+import { identity, bio, photo, links } from "../../../data/profile";
+import Action from "./Action.astro";
+import { emailContact as email, telegramContact as telegram } from "./contacts";
+---
+
+<section id="top" class="identity" aria-labelledby="name">
+  <div class="q-wrap q-grid">
+    <figure class="portrait">
+      <img
+        src={photo.src}
+        srcset={photo.srcset}
+        width="256"
+        height="256"
+        alt={photo.alt}
+        decoding="async"
+        loading="eager"
+      />
+    </figure>
+
+    <div class="q-col">
+      <h1 id="name">{identity.fullName}</h1>
+      <p class="tagline">{identity.tagline}</p>
+      <p class="standing">
+        <span>{identity.role}</span>
+        <span class="sep" aria-hidden="true"></span>
+        <span>{identity.location}</span>
+      </p>
+
+      <div class="actions">
+        <Action href={links.cv} variant="solid" icon="mdi:tray-arrow-down">Download CV</Action>
+        <Action href={email.href} icon="mdi:email-outline">{email.short}</Action>
+        <Action href={telegram.href} icon="mdi:telegram">{telegram.short}</Action>
+      </div>
+
+      <div class="bio">
+        {bio.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  .identity {
+    padding-block: var(--u7) var(--section-gap);
+  }
+
+  .portrait img {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 2px;
+    background: var(--paper-sunk);
+    object-fit: cover;
+  }
+
+  h1 {
+    font-size: var(--t-display);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: var(--track-display);
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .tagline {
+    margin-top: var(--u3);
+    font-size: var(--t-lead);
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: var(--track-lead);
+    color: var(--ink-2);
+  }
+
+  .standing {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    margin-top: var(--u4);
+    font-size: var(--t-small);
+    color: var(--ink-3);
+  }
+
+  .sep {
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--ink-3);
+    flex: none;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--u5);
+    row-gap: var(--u2);
+    margin-top: var(--u5);
+  }
+
+  .bio {
+    margin-top: var(--u6);
+    display: grid;
+    gap: var(--u3);
+    font-size: var(--t-small);
+    line-height: 1.7;
+    color: var(--ink-2);
+  }
+
+  .bio p:first-child {
+    /* The one fact a recruiter reads first gets the weight, not a bigger size. */
+    font-size: var(--t-body);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  @media (min-width: 64rem) {
+    .identity {
+      padding-block: var(--u8) var(--section-gap);
+    }
+
+    .portrait {
+      justify-self: end;
+    }
+
+    .portrait img {
+      width: 5rem;
+      height: 5rem;
+    }
+  }
+</style>

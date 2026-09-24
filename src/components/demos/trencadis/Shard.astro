@@ -1,0 +1,105 @@
+---
+// One piece of broken, glazed ceramic. Every surface in this world is made of
+// these: tiles in the wall, buttons, plaques, project panels. Size and position
+// come from whatever grid the caller places it in.
+import type { HTMLTag } from "astro/types";
+import type { Tone } from "./tones";
+
+interface Props {
+  tone?: Tone;
+  /** 1–6: which corners the break took off. */
+  cut?: number;
+  /** Lightness the glaze lot came out at, 0–4. */
+  lot?: number;
+  as?: HTMLTag;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { tone = "bone", cut = 1, lot = 0, as = "div", class: className, ...rest } = Astro.props;
+const Tag = as as any;
+const jitter = ["0%", "1.4%", "2.6%", "4%", "2%"][lot % 5];
+---
+
+<Tag class:list={["shard", className]} data-tone={tone} style={`--jit:${jitter}`} {...rest}>
+  <span class="shard__plate" aria-hidden="true"><span class="shard__face" data-cut={cut}></span></span>
+  <span class="shard__body"><slot /></span>
+</Tag>
+
+<style lang="scss">
+  @use "demos/trencadis/world" as w;
+
+  .shard {
+    position: relative;
+    display: block;
+    color: var(--gl-ink);
+    isolation: isolate;
+
+    @include w.tones;
+  }
+
+  .shard__plate {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    // The plate carries the cast shadow; the face inside it carries the cut,
+    // so the shadow follows the broken silhouette instead of a rectangle.
+    filter: drop-shadow(0 2px 3px hsl(20 40% 2% / 0.55)) drop-shadow(0 8px 14px hsl(20 40% 2% / 0.35));
+  }
+
+  .shard__face {
+    position: absolute;
+    inset: 0;
+    @include w.glaze;
+    @include w.cuts;
+  }
+
+  .shard__body {
+    position: relative;
+    z-index: 1;
+    display: block;
+    height: 100%;
+  }
+
+  // Interactive shards lift out of the grout and the sheen swings across.
+  a.shard,
+  button.shard {
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    .shard__face {
+      transition: filter 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &:hover,
+    &:focus-visible {
+      transform: translateY(-2px);
+
+      .shard__face {
+        --glaze-from: 236deg;
+        filter: brightness(1.1);
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  @include w.calm {
+    a.shard,
+    button.shard {
+      transition: none;
+
+      .shard__face {
+        transition: none;
+      }
+
+      &:hover,
+      &:focus-visible {
+        transform: none;
+      }
+    }
+  }
+</style>

@@ -1,0 +1,67 @@
+---
+import { identity, links } from "../../../data/profile";
+import { emailContact as email } from "./contacts";
+---
+
+<header class="bar">
+  <div class="q-wrap inner">
+    <a class="home" href="#top">{identity.domain}</a>
+    <nav class="routes" aria-label="Conversions">
+      <a href={links.cv} target="_blank" rel="noopener noreferrer">Download CV</a>
+      <a href={email.href}>Email</a>
+    </nav>
+  </div>
+</header>
+
+<style lang="scss">
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--paper);
+    border-bottom: 1px solid var(--hair);
+  }
+
+  .inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u4);
+    min-height: var(--bar-h);
+  }
+
+  .home {
+    font-size: var(--t-small);
+    font-weight: 550;
+    letter-spacing: var(--track-title);
+    color: var(--ink);
+    text-decoration-line: none;
+  }
+
+  .routes {
+    display: flex;
+    align-items: center;
+    gap: var(--u5);
+  }
+
+  .routes a {
+    font-size: var(--t-small);
+    font-weight: 450;
+    color: var(--ink-2);
+    text-decoration-line: none;
+    border-bottom: 1px solid var(--hair-strong);
+    padding-bottom: 1px;
+    transition: color var(--fast) var(--ease-out), border-color var(--fast) var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .home:hover,
+    .routes a:hover {
+      color: var(--ink);
+    }
+
+    .routes a:hover {
+      border-bottom-color: var(--ink);
+    }
+  }
+</style>

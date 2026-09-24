@@ -1,0 +1,217 @@
+---
+// Trencadís — Barcelona modernisme rendered as interface.
+// Self-contained: this route owns its document shell, its tokens and its type.
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import { SEO } from "astro-seo";
+
+import Facade from "../../components/demos/trencadis/Facade.astro";
+import IronRule from "../../components/demos/trencadis/IronRule.astro";
+import Mosaic from "../../components/demos/trencadis/Mosaic.astro";
+import Reach from "../../components/demos/trencadis/Reach.astro";
+import TopBar from "../../components/demos/trencadis/TopBar.astro";
+import Works from "../../components/demos/trencadis/Works.astro";
+import { seo } from "../../data/profile";
+
+// Abril Fatface (SIL OFL 1.1), self-hosted from this demo's own folder — see
+// src/styles/demos/trencadis/fonts/OFL-NOTICE.md. No font CDN is contacted.
+import abrilLatin from "../../styles/demos/trencadis/fonts/abril-fatface-latin-400.woff2";
+import abrilLatinExt from "../../styles/demos/trencadis/fonts/abril-fatface-latin-ext-400.woff2";
+
+const raw = import.meta.env.BASE_URL ?? "/";
+const base = raw.endsWith("/") ? raw : `${raw}/`;
+
+const displayFace = `
+@font-face {
+  font-family: "Abril Fatface";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("${abrilLatin}") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Abril Fatface";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("${abrilLatinExt}") format("woff2");
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#17120f" />
+    <SEO title={seo.title} description={seo.description} />
+    <link rel="icon" href={`${base}favicon.svg`} />
+    <link rel="preload" as="font" type="font/woff2" href={abrilLatin} crossorigin />
+    <style is:inline set:html={displayFace}></style>
+    <script is:inline>
+      // Arm motion before first paint so the reveal never flashes, and never
+      // arms at all when the visitor asked for stillness.
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.documentElement.classList.add("tc-motion");
+      }
+    </script>
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <TopBar />
+    <main id="main" class="shell">
+      <Facade />
+      <IronRule id="a" />
+      <Mosaic />
+      <IronRule id="b" />
+      <Works />
+      <IronRule id="c" />
+      <Reach />
+    </main>
+
+    <script is:inline>
+      (function () {
+        var wall = document.querySelector("[data-mosaic]");
+        if (!wall || !document.documentElement.classList.contains("tc-motion")) return;
+        if (!("IntersectionObserver" in window)) {
+          wall.classList.add("is-set");
+          return;
+        }
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              wall.classList.add("is-set");
+              io.disconnect();
+            });
+          },
+          { threshold: 0.12 }
+        );
+        io.observe(wall);
+      })();
+    </script>
+  </body>
+</html>
+
+<style lang="scss" is:global>
+  @use "demos/trencadis/world" as w;
+
+  :root {
+    color-scheme: dark;
+
+    // Grout is the ground; everything else is a fired glaze on top of it.
+    --tc-grout: hsl(24 14% 7.5%);
+    --tc-grout-2: hsl(22 12% 12%);
+    --tc-bone: hsl(38 34% 91%);
+    --tc-bone-dim: hsl(34 18% 72%);
+    --tc-ink-dark: hsl(24 45% 11%);
+    --tc-iron-line: hsl(24 12% 22%);
+    --tc-ochre-mark: hsl(38 68% 62%);
+    --tc-terra-mark: hsl(12 62% 48%);
+
+    --tc-display: "Abril Fatface", "Iowan Old Style", Georgia, serif;
+    --tc-text: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    scrollbar-color: hsl(24 14% 28%) var(--tc-grout);
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--tc-text);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--tc-bone);
+    background-color: var(--tc-grout);
+    caret-color: var(--tc-ochre-mark);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img,
+  svg {
+    max-width: 100%;
+  }
+
+  ::selection {
+    background: hsl(12 62% 40%);
+    color: hsl(38 40% 95%);
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--tc-grout);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(24 14% 26%);
+    border: 3px solid var(--tc-grout);
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(20 22% 34%);
+  }
+
+  // A dark core ring plus a bright outer ring, so focus reads on grout and on
+  // the palest glaze alike.
+  :focus-visible {
+    outline: 2px solid var(--tc-ink-dark);
+    outline-offset: 0;
+    box-shadow:
+      0 0 0 5px var(--tc-ochre-mark),
+      0 0 0 7px hsl(20 40% 4% / 0.7);
+  }
+
+  .skip {
+    position: absolute;
+    left: 0.75rem;
+    top: -4rem;
+    z-index: 40;
+    padding: 0.7rem 1.1rem;
+    font-weight: 600;
+    color: var(--tc-ink-dark);
+    background: var(--tc-ochre-mark);
+    text-decoration: none;
+    transition: top 160ms ease-out;
+
+    &:focus {
+      top: 0.75rem;
+    }
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 2.75rem);
+    padding-bottom: clamp(3rem, 8vw, 5.5rem);
+  }
+
+  @include w.calm {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>

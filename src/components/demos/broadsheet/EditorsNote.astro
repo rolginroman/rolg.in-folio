@@ -1,0 +1,52 @@
+---
+import { ndaNote } from "../../../data/profile";
+
+// The CV link lives inside the note's own sentence rather than after it.
+const [beforeCv, afterCv] = ndaNote.body.split(ndaNote.cvLabel);
+---
+
+<aside class="note">
+  <p class="note__body">
+    <span class="note__lead">{ndaNote.lead}</span>{" "}{beforeCv}<a
+      class="note__link"
+      href={ndaNote.cvLink}
+      rel="noopener"
+      target="_blank">{ndaNote.cvLabel}</a
+    >{afterCv}
+  </p>
+</aside>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .note {
+    border-top: 1px solid $ink;
+    margin-top: clamp(2rem, 5vw, 3rem);
+    padding-top: 1.1rem;
+  }
+
+  .note__body {
+    @include optical(18, 400);
+    font-style: italic;
+    font-size: 1.0625rem;
+    line-height: 1.62;
+    color: $ink-soft;
+    max-width: 58ch;
+    margin-inline: auto;
+    text-align: center;
+    text-wrap: pretty;
+  }
+
+  .note__lead {
+    font-style: normal;
+    @include furniture(0.6875rem);
+    letter-spacing: 0.13em;
+    color: $ink;
+  }
+
+  .note__link {
+    font-style: normal;
+    color: $spot;
+    text-decoration-thickness: 1px;
+  }
+</style>

@@ -1,0 +1,72 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  /** Small line under the label: the address, the file kind, the destination. */
+  note: string;
+  variant?: "ink" | "outline";
+  external?: boolean;
+}
+
+const { href, label, note, variant = "outline", external = false } = Astro.props;
+---
+
+<a
+  class={`coupon coupon--${variant}`}
+  href={href}
+  rel={external ? "noopener" : undefined}
+  target={external ? "_blank" : undefined}
+>
+  <span class="coupon__label">{label}</span>
+  <span class="coupon__note">{note}</span>
+</a>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .coupon {
+    display: grid;
+    gap: 0.3rem;
+    align-content: center;
+    padding: 0.9rem 1.1rem 0.95rem;
+    text-decoration: none;
+    border: 1px solid $ink;
+    transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 200ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .coupon__label {
+    @include optical(20, 500);
+    font-size: 1.125rem;
+    line-height: 1.15;
+    letter-spacing: -0.012em;
+  }
+
+  .coupon__note {
+    @include furniture(0.625rem);
+    letter-spacing: 0.13em;
+    opacity: 0.85; // 4.97:1 on the spot ink, 11.6:1 on the hover ink
+    overflow-wrap: anywhere;
+  }
+
+  .coupon--ink {
+    background: $spot;
+    border-color: $spot;
+    color: $paper;
+  }
+
+  .coupon--ink:hover {
+    background: $ink;
+    border-color: $ink;
+  }
+
+  .coupon--outline {
+    background: transparent;
+    color: $ink;
+  }
+
+  .coupon--outline:hover {
+    background: $ink;
+    color: $paper;
+  }
+</style>

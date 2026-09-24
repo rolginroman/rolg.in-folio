@@ -1,0 +1,209 @@
+---
+import SectionHead from "./SectionHead.astro";
+import Coupon from "./Coupon.astro";
+import { contacts, socials, links, identity } from "../../../data/profile";
+
+const bare = (url: string) => url.replace(/^https?:\/\//, "");
+
+// Derived from the contact list itself, so adding a third route needs no
+// change here beyond a display name.
+const routeNames: Record<string, string> = {
+  "mdi:email-outline": "E-mail",
+  "mdi:telegram": "Telegram",
+};
+
+const routes = contacts.map((contact) => ({
+  name: routeNames[contact.iconName] ?? contact.short,
+  value: contact.href.startsWith("mailto:") ? links.mail : bare(contact.href),
+  href: contact.href,
+  label: contact.label,
+}));
+
+const year = new Date().getFullYear();
+---
+
+<section class="colophon" id="contact" aria-labelledby="contact-title">
+  <SectionHead label="Correspondence" folio={`${routes.length} routes`} />
+  <h2 class="colophon__title" id="contact-title">Write to the desk</h2>
+  <ul class="routes">
+    {
+      routes.map((route) => (
+        <li class="route">
+          <a class="route__link" href={route.href} aria-label={route.label}>
+            <span class="route__name">{route.name}</span>
+            <span class="route__value">{route.value}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="colophon__grid">
+    <Coupon
+      href={links.cv}
+      label="Download the CV"
+      note="The full record, PDF"
+      variant="ink"
+      external
+    />
+    <nav class="elsewhere" aria-label="Profiles elsewhere">
+      <span class="elsewhere__head">Elsewhere</span>
+      <ul class="elsewhere__list">
+        {
+          socials.map((social) => (
+            <li>
+              <a class="elsewhere__link" href={social.href} rel="me noopener" target="_blank">
+                {social.short}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</section>
+
+<footer class="folio">
+  <p class="folio__cell">&copy; {year}{" "}{identity.fullName}</p>
+  <p class="folio__cell">Set in Newsreader &amp; Inter</p>
+  <p class="folio__cell">
+    Built with Astro &mdash;
+    <a href={links.projects.rolginfolio} rel="noopener" target="_blank">read the source</a>
+  </p>
+</footer>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .colophon {
+    padding-top: clamp(2.75rem, 7vw, 4.5rem);
+  }
+
+  .colophon__title {
+    @include optical(36, 400);
+    font-size: clamp(1.75rem, 4.4vw, 2.6rem);
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+    padding-bottom: clamp(1rem, 2.6vw, 1.5rem);
+  }
+
+  .routes {
+    border-top: 2px solid $ink;
+  }
+
+  .route {
+    border-bottom: 1px solid $rule;
+  }
+
+  .route__link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem 1rem;
+    padding: clamp(0.9rem, 2.4vw, 1.35rem) 0;
+    text-decoration: none;
+    transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      padding-inline 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .route__link:hover,
+  .route__link:focus-visible {
+    background: $paper-deep;
+    padding-inline: 0.9rem;
+  }
+
+  .route__name {
+    @include optical(36, 400);
+    font-size: clamp(1.6rem, 4.5vw, 2.35rem);
+    line-height: 1.05;
+    letter-spacing: -0.028em;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.14em;
+    transition: text-decoration-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .route__link:hover .route__name,
+  .route__link:focus-visible .route__name {
+    text-decoration-color: $spot;
+  }
+
+  .route__value {
+    @include furniture(0.6875rem);
+    color: $spot;
+    letter-spacing: 0.12em;
+    overflow-wrap: anywhere;
+  }
+
+  .colophon__grid {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    padding-top: clamp(1.5rem, 3.5vw, 2.25rem);
+    align-items: start;
+
+    @include bp(46rem) {
+      grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    }
+  }
+
+  .elsewhere__head {
+    @include furniture(0.625rem);
+    display: block;
+    letter-spacing: 0.2em;
+    color: $ink-soft;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid $ink;
+  }
+
+  .elsewhere__list {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .elsewhere__list li {
+    flex: 1 1 auto;
+    border-bottom: 1px solid $rule;
+    border-left: 1px solid $rule;
+  }
+
+  .elsewhere__list li:first-child {
+    border-left: 0;
+  }
+
+  .elsewhere__link {
+    @include optical(18, 400);
+    display: block;
+    font-size: 1.0625rem;
+    padding: 0.7rem 0.9rem;
+    text-decoration: none;
+    transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .elsewhere__link:hover,
+  .elsewhere__link:focus-visible {
+    background: $ink;
+    color: $paper;
+  }
+
+  .folio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.5rem;
+    justify-content: space-between;
+    margin-top: clamp(2.75rem, 7vw, 4.5rem);
+    padding: 0.9rem 0 clamp(2rem, 5vw, 3rem);
+    border-top: 1px solid $ink;
+  }
+
+  .folio__cell {
+    @include furniture(0.5625rem);
+    color: $ink-soft;
+    letter-spacing: 0.13em;
+  }
+
+  .folio__cell a {
+    color: $spot;
+  }
+</style>

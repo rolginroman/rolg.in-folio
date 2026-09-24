@@ -1,0 +1,14 @@
+---
+interface Props {
+  /** Hairline by default; `mid` is a 1px ink line, `heavy` the 3px masthead bar. */
+  weight?: "hair" | "mid" | "heavy";
+  /** Stagger for the ink-in, in milliseconds. */
+  delay?: number;
+  class?: string;
+}
+
+const { weight = "hair", delay = 0, class: className } = Astro.props;
+const modifier = weight === "hair" ? "" : ` bs-rule--${weight}`;
+---
+
+<hr class={`bs-rule${modifier}${className ? ` ${className}` : ""}`} style={`--bs-rule-delay:${delay}ms`} />

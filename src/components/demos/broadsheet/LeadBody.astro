@@ -1,0 +1,136 @@
+---
+import Rule from "./Rule.astro";
+import Coupon from "./Coupon.astro";
+import { bio, links } from "../../../data/profile";
+
+// Drop cap plus a caps lead-in: the opening letter is set large, the next few
+// words carry on in caps, the way a front page opens a story.
+const [, ...paragraphs] = bio;
+const [opening, ...rest] = paragraphs;
+const dropCap = opening.slice(0, 1);
+const [, leadIn, tail] = opening
+  .slice(1)
+  .match(/^(\S+(?:\s+\S+){0,2})([\s\S]*)$/) ?? ["", "", opening.slice(1)];
+
+// Lifted verbatim out of the paragraph above it, the way a sub-editor pulls one.
+const pullQuote = opening.split(" through a combination")[0]?.match(/My true passion.*/)?.[0];
+---
+
+<div class="lead-body">
+  <Rule delay={420} />
+  <div class="lead__body">
+    <p class="lead__para lead__para--open">
+      <span class="lead__drop" aria-hidden="true">{dropCap}</span><span class="lead__sr"
+        >{dropCap}</span
+      ><span class="lead__leadin">{leadIn}</span>{tail}
+    </p>
+    {rest.map((paragraph) => <p class="lead__para">{paragraph}</p>)}
+  </div>
+  {
+    pullQuote && (
+      <blockquote class="pull">
+        <Rule delay={520} />
+        <p class="pull__text">{pullQuote}&hellip;</p>
+        <Rule delay={560} />
+      </blockquote>
+    )
+  }
+  <div class="lead__exits">
+    <Coupon href={links.cv} label="Download the CV" note="PDF via l.rolg.in" variant="ink" external />
+    <Coupon
+      href={`mailto:${links.mail}?subject=Hi%20Roman%2C%20I%20have%20a%20question.`}
+      label="Write to me"
+      note={links.mail}
+    />
+  </div>
+</div>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .lead-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding-top: clamp(1.1rem, 2.6vw, 1.5rem);
+  }
+
+  .lead__body {
+    padding-top: clamp(1.1rem, 2.6vw, 1.5rem);
+    max-width: $measure;
+  }
+
+  .lead__para {
+    @include optical(16, 400);
+    font-size: 1.0625rem;
+    line-height: 1.72;
+    color: $ink;
+    text-wrap: pretty;
+
+    & + & {
+      text-indent: 1.35em;
+      margin-top: 0;
+    }
+  }
+
+  .lead__leadin {
+    text-transform: uppercase;
+    letter-spacing: 0.055em;
+    font-size: 0.93em;
+    font-variation-settings: "opsz" 16, "wght" 500;
+  }
+
+  // A real three-line drop cap: the glyph is aria-hidden and the letter is
+  // repeated for assistive tech so the word is never read as "roficient".
+  .lead__drop {
+    @include optical(72, 500);
+    float: left;
+    font-size: 3.85em;
+    line-height: 0.78;
+    padding: 0.06em 0.09em 0 0;
+    margin-bottom: -0.06em;
+    color: $spot;
+  }
+
+  .lead__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .pull {
+    max-width: $measure;
+    margin: clamp(1.5rem, 3.5vw, 2.25rem) 0 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .pull__text {
+    @include optical(36, 400);
+    font-style: italic;
+    font-size: clamp(1.3rem, 3.2vw, 1.7rem);
+    line-height: 1.34;
+    letter-spacing: -0.012em;
+    padding: clamp(0.85rem, 2vw, 1.15rem) 0;
+    text-wrap: pretty;
+  }
+
+  .lead__exits {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: clamp(1.6rem, 4vw, 2.25rem);
+
+    @include bp(26rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @include bp(46rem) {
+      max-width: 34rem;
+    }
+  }
+</style>

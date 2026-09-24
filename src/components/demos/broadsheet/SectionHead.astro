@@ -1,0 +1,44 @@
+---
+import Rule from "./Rule.astro";
+
+interface Props {
+  /** The running head that sits on the rule. */
+  label: string;
+  /** Right-hand slug: a count, a continuation note, a section letter. */
+  folio?: string;
+  delay?: number;
+}
+
+const { label, folio, delay = 0 } = Astro.props;
+---
+
+<div class="head">
+  <Rule weight="mid" delay={delay} />
+  <div class="head__row">
+    <span class="head__label">{label}</span>
+    {folio && <span class="head__folio">{folio}</span>}
+  </div>
+</div>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .head__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0 0.75rem;
+  }
+
+  .head__label {
+    @include furniture(0.75rem);
+    letter-spacing: 0.16em;
+  }
+
+  .head__folio {
+    @include furniture(0.6875rem);
+    color: $ink-soft;
+    letter-spacing: 0.14em;
+  }
+</style>

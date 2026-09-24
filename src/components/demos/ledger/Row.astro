@@ -1,0 +1,238 @@
+---
+/**
+ * The one row anatomy this world has. Stack entries, projects, upstream reports
+ * and contact channels all render through it, so every row on the page sits on
+ * the same four columns: number, subject, leader, metadata.
+ */
+export interface Props {
+  /** Fragment target, so a row can be linked to and marked as current. */
+  id?: string;
+  title: string;
+  /** Absent where there is nothing public to open. The row stays plain type. */
+  href?: string;
+  /** Trailing column. Short, tabular, one voice — a year, a count, an address. */
+  meta?: string;
+  /** Second line under the subject, always visible. One line of plain fact. */
+  note?: string;
+}
+
+const { id, title, href, meta, note } = Astro.props;
+const external = href ? /^https?:/.test(href) : false;
+/** Anything slotted is deferred detail: shown on pointer hover/focus, always
+    open where there is no hover to speak of. */
+const hasReveal = Astro.slots.has("default");
+---
+
+<li class="led-row led-sub" id={id}>
+  {
+    /* The number is a permalink to its own entry — a real index affordance, and
+       the thing that makes every row reachable by keyboard even when its
+       subject is private work with nothing public to open. */
+    id ? (
+      <a class="led-num num" href={`#${id}`} aria-label={`Permalink to ${title}`} />
+    ) : (
+      <span class="led-num" aria-hidden="true" />
+    )
+  }
+  <span class="subject">
+    {
+      href ? (
+        <a
+          href={href}
+          target={external ? "_blank" : undefined}
+          rel={external ? "noopener noreferrer" : undefined}
+        >
+          {title}
+        </a>
+      ) : (
+        title
+      )
+    }
+  </span>
+  <span class="leader" aria-hidden="true"></span>
+  {meta && <span class="meta">{meta}</span>}
+  {note && <p class="note led-prose">{note}</p>}
+  {
+    hasReveal && (
+      <div class="reveal">
+        <div class="reveal-inner led-prose">
+          <slot />
+        </div>
+      </div>
+    )
+  }
+</li>
+
+<style lang="scss">
+  .led-row {
+    align-items: baseline;
+    row-gap: var(--u1);
+    /* 44px minimum, so the row is a real target on a phone even though the
+       visual rhythm is set by the type, not by a box. */
+    min-block-size: 2.75rem;
+    padding-block: 0.65rem;
+    border-bottom: 1px solid var(--hair);
+    /* Explicit, so the metadata cell can inherit it and knock the dots out
+       from under itself in both the rest and hover states. */
+    background-color: var(--paper);
+    counter-increment: led;
+    transition: background-color var(--fast) var(--ease);
+  }
+
+  .subject {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: var(--t-subject);
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: var(--track-row);
+    color: var(--ink);
+    min-width: 0;
+    overflow-wrap: break-word;
+    transition: color var(--fast) var(--ease);
+  }
+
+  .subject a {
+    /* The underline is the only thing that says "this opens something". */
+    border-bottom: 1px solid var(--hair-strong);
+    padding-bottom: 0.05em;
+    transition: border-color var(--fast) var(--ease), color var(--fast) var(--ease);
+  }
+
+  /* An empty box aligned on the row's first baseline: its bottom margin edge
+     is its baseline, so the dots land exactly on the text baseline. */
+  .leader {
+    display: none;
+    grid-column: 3;
+    grid-row: 1;
+    height: 2px;
+    background-image: radial-gradient(circle at center, var(--dot) 0.9px, transparent 1px);
+    background-size: 0.45rem 2px;
+    background-repeat: repeat-x;
+    background-position: 0 100%;
+    transition: background-image var(--fast) var(--ease);
+  }
+
+  .meta {
+    grid-column: 2;
+    grid-row: 2;
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-meta);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: var(--track-meta);
+    line-height: 1.5;
+    color: var(--ink-3);
+    overflow-wrap: anywhere;
+  }
+
+  .note {
+    grid-column: 2;
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+
+  .reveal {
+    grid-column: 2;
+    display: grid;
+    grid-template-rows: 1fr;
+    overflow: hidden;
+  }
+
+  .reveal-inner {
+    min-height: 0;
+    font-size: var(--t-small);
+    line-height: 1.65;
+    color: var(--ink-3);
+  }
+
+  .led-num {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .num {
+    /* A bigger target than the two digits it shows, without a box around it. */
+    display: inline-block;
+    min-width: 2ch;
+    padding-block: 0.35rem;
+    padding-inline-end: 0.5rem;
+    margin-block: -0.35rem;
+  }
+
+  @media (min-width: 48rem) {
+    .leader {
+      display: block;
+    }
+
+    .leader {
+      /* Runs the full width to the page edge; the metadata sits on top of it,
+         so the dots stop exactly where the trailing column's text begins. */
+      grid-column: 3 / -1;
+    }
+
+    .meta {
+      grid-column: 4;
+      grid-row: 1;
+      justify-self: end;
+      text-align: right;
+      white-space: nowrap;
+      overflow-wrap: normal;
+      background-color: inherit;
+      padding-inline-start: 0.5rem;
+    }
+
+    .note,
+    .reveal {
+      grid-column: 2 / -1;
+    }
+  }
+
+  /* Detail is deferred only where there is a pointer to defer it with. Touch and
+     keyboard-only-narrow get every word at rest. */
+  @media (hover: hover) and (pointer: fine) {
+    .reveal {
+      grid-template-rows: 0fr;
+      transition: grid-template-rows var(--fast) var(--ease);
+    }
+
+    .led-row:hover .reveal,
+    .led-row:focus-within .reveal,
+    .led-row:target .reveal {
+      grid-template-rows: 1fr;
+    }
+
+    .led-row:hover,
+    .led-row:focus-within {
+      background-color: var(--paper-sunk);
+    }
+
+    .led-row:hover .subject a,
+    .led-row:focus-within .subject a {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .led-row:hover .led-num,
+    .led-row:focus-within .led-num {
+      color: var(--accent);
+    }
+
+    .led-row:hover .leader,
+    .led-row:focus-within .leader {
+      background-image: radial-gradient(circle at center, var(--accent) 0.9px, transparent 1px);
+    }
+  }
+
+  /* Current: the row you were sent to. Same accent, same meaning as hover. */
+  .led-row:target {
+    background-color: var(--paper-sunk);
+  }
+
+  .led-row:target .led-num,
+  .led-row:target .subject a {
+    color: var(--accent);
+  }
+</style>

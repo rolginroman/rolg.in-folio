@@ -1,0 +1,45 @@
+---
+import { upstream } from "../../../data/profile";
+import Row from "./Row.astro";
+
+const KIND_LABEL = { issue: "Issue", pr: "Pull request" } as const;
+
+const entries = upstream.map((report, index) => ({
+  id: `upstream-${index + 1}`,
+  title: `${report.repo} #${report.number}`,
+  href: report.link,
+  meta: String(report.year),
+  note: report.title,
+  kind: KIND_LABEL[report.kind],
+  /** The destination, spelled out — an index says where a row points. */
+  target: report.link.replace(/^https?:\/\//, ""),
+}));
+---
+
+{
+  entries.map((entry) => (
+    <Row id={entry.id} title={entry.title} href={entry.href} meta={entry.meta} note={entry.note}>
+      <p class="facets">
+        {entry.kind}
+        <span class="sep"> / </span>
+        {entry.target}
+      </p>
+    </Row>
+  ))
+}
+
+<style lang="scss">
+  .facets {
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--track-meta);
+    line-height: 1.6;
+    color: var(--ink-3);
+    overflow-wrap: anywhere;
+  }
+
+  .sep {
+    color: var(--ink-3);
+  }
+</style>

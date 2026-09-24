@@ -1,0 +1,161 @@
+---
+import SectionHead from "./SectionHead.astro";
+import { upstream, upstreamStats, links } from "../../../data/profile";
+
+// The kind column already says "merged", so the title does not need to twice.
+const headline = (title: string, kind: "issue" | "pr") =>
+  kind === "pr" ? title.replace(/\s*—\s*merged$/i, "") : title;
+
+const kindLabel = { issue: "Issue", pr: "Merged PR" } as const;
+---
+
+<section class="wire" id="upstream" aria-labelledby="upstream-title">
+  <SectionHead label="Upstream" folio={`Since ${upstreamStats.sinceYear}`} />
+  <h2 class="wire__title" id="upstream-title">Bugs filed in other people&rsquo;s code</h2>
+  <p class="wire__standfirst">
+    {upstreamStats.pullRequestsAuthored} pull requests authored outside my own repositories since {
+      upstreamStats.sinceYear
+    }, {upstreamStats.pullRequestsMerged} of them merged. Every line below opens on
+    <a class="wire__inline" href={links.github} rel="noopener" target="_blank">GitHub</a>.
+  </p>
+  <ol class="wire__list">
+    {
+      upstream.map((report) => (
+        <li class="report">
+          <a class="report__link" href={report.link} rel="noopener" target="_blank">
+            <span class="report__repo">{report.repo}</span>
+            <span class="report__num">#{report.number}</span>
+            <span class="report__headline">{headline(report.title, report.kind)}</span>
+            <span class="report__meta">
+              <span class="report__kind">{kindLabel[report.kind]}</span>
+              <span class="report__year">{report.year}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .wire {
+    padding-top: clamp(2.75rem, 7vw, 4.5rem);
+  }
+
+  .wire__title {
+    @include optical(36, 400);
+    font-size: clamp(1.75rem, 4.4vw, 2.6rem);
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+  }
+
+  .wire__standfirst {
+    @include optical(20, 400);
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.55;
+    color: $ink-soft;
+    font-variant-numeric: tabular-nums lining-nums;
+    max-width: 58ch;
+    padding: clamp(0.75rem, 2vw, 1rem) 0 clamp(1rem, 2.6vw, 1.5rem);
+    text-wrap: pretty;
+  }
+
+  .wire__inline {
+    color: $spot;
+    text-decoration-thickness: 1px;
+  }
+
+  .wire__list {
+    border-top: 2px solid $ink;
+  }
+
+  .report {
+    border-bottom: 1px solid $rule;
+  }
+
+  // An agate column: repo, number, headline, kind, year. Every row is the link.
+  .report__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 1rem;
+    row-gap: 0.3rem;
+    padding: 0.85rem 0;
+    text-decoration: none;
+    transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    @include bp(52rem) {
+      grid-template-columns: minmax(0, 15rem) 4.5rem minmax(0, 1fr) 8.5rem;
+      column-gap: 1.5rem;
+      align-items: baseline;
+      padding: 0.95rem 0;
+    }
+  }
+
+  .report__link:hover {
+    background: $paper-deep;
+  }
+
+  .report__repo {
+    @include furniture(0.625rem);
+    color: $ink-soft;
+    letter-spacing: 0.1em;
+    overflow-wrap: anywhere;
+  }
+
+  .report__num {
+    @include furniture(0.625rem);
+    color: $spot;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums lining-nums;
+    text-align: right;
+
+    @include bp(52rem) {
+      text-align: left;
+    }
+  }
+
+  .report__headline {
+    @include optical(18, 400);
+    font-size: 1.0625rem;
+    line-height: 1.42;
+    color: $ink;
+    grid-column: 1 / -1;
+    text-wrap: pretty;
+    text-decoration: underline;
+    text-decoration-color: rgba(163, 46, 28, 0.4);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.17em;
+    transition: text-decoration-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    @include bp(52rem) {
+      grid-column: auto;
+    }
+  }
+
+  .report__link:hover .report__headline,
+  .report__link:focus-visible .report__headline {
+    text-decoration-color: $spot;
+  }
+
+  .report__meta {
+    @include furniture(0.5625rem);
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: $ink-soft;
+    letter-spacing: 0.13em;
+    grid-column: 1 / -1;
+
+    @include bp(52rem) {
+      grid-column: auto;
+    }
+  }
+
+  .report__year {
+    color: $ink;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+</style>

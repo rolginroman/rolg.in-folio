@@ -1,0 +1,132 @@
+---
+/**
+ * The table of contents, set as rows on the same grid as everything else — so
+ * the page opens the way it continues.
+ */
+export interface Props {
+  divisions: { id: string; label: string; count: number }[];
+}
+
+const { divisions } = Astro.props;
+---
+
+<nav class="contents led-sub" aria-label="Contents">
+  <p class="led-label led-full caption">Contents</p>
+  <ol class="list led-sub">
+    {
+      divisions.map((division) => (
+        <li class="row led-sub">
+          <span class="idx" aria-hidden="true" />
+          <a class="link" href={`#${division.id}`}>
+            {division.label}
+          </a>
+          <span class="leader" aria-hidden="true" />
+          <span class="count">{division.count}</span>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style lang="scss">
+  .contents {
+    padding-block-start: var(--u7);
+    counter-reset: toc;
+  }
+
+  .caption {
+    padding-block-end: var(--u3);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .row {
+    align-items: baseline;
+    background-color: var(--paper);
+    min-block-size: 2.75rem;
+    padding-block: 0.55rem;
+    border-bottom: 1px solid var(--hair);
+    counter-increment: toc;
+    transition: background-color var(--fast) var(--ease);
+  }
+
+  .idx {
+    grid-column: 1;
+    grid-row: 1;
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-meta);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+    transition: color var(--fast) var(--ease);
+  }
+
+  .idx::before {
+    content: counter(toc, decimal-leading-zero);
+  }
+
+  .link {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: var(--t-subject);
+    font-weight: 500;
+    color: var(--ink);
+    transition: color var(--fast) var(--ease);
+  }
+
+  .leader {
+    display: none;
+    grid-column: 3;
+    grid-row: 1;
+    height: 2px;
+    background-image: radial-gradient(circle at center, var(--dot) 0.9px, transparent 1px);
+    background-size: 0.45rem 2px;
+    background-repeat: repeat-x;
+    background-position: 0 100%;
+  }
+
+  .count {
+    grid-column: 2;
+    grid-row: 2;
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-meta);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+  }
+
+  .count::after {
+    content: " entries";
+  }
+
+  @media (min-width: 48rem) {
+    .leader {
+      display: block;
+    }
+
+    .leader {
+      grid-column: 3 / -1;
+    }
+
+    .count {
+      grid-column: 4;
+      grid-row: 1;
+      justify-self: end;
+      white-space: nowrap;
+      background-color: inherit;
+      padding-inline-start: 0.5rem;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .row:hover {
+      background-color: var(--paper-sunk);
+    }
+
+    .row:hover .link,
+    .row:focus-within .link,
+    .row:hover .idx,
+    .row:focus-within .idx {
+      color: var(--accent);
+    }
+  }
+</style>

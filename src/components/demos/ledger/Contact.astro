@@ -1,0 +1,28 @@
+---
+import Row from "./Row.astro";
+import { channels, destination } from "./channels";
+---
+
+{
+  channels.map((channel, index) => (
+    <Row
+      id={`contact-${index + 1}`}
+      title={channel.title}
+      href={channel.href}
+      meta={destination(channel.href)}
+    >
+      <p class="facets">{channel.label}</p>
+    </Row>
+  ))
+}
+
+<style lang="scss">
+  .facets {
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--track-meta);
+    line-height: 1.6;
+    color: var(--ink-3);
+  }
+</style>

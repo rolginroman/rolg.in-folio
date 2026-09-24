@@ -1,0 +1,171 @@
+---
+import { contacts, socials, links, identity } from "../../../data/profile";
+import SectionHead from "./SectionHead.astro";
+import Icon from "./Icon.astro";
+
+const routes = contacts.map((route) => ({
+  ...route,
+  /** mailto: stays in the current context; everything else opens out. */
+  external: !route.href.startsWith("mailto:"),
+  icon: route.href.startsWith("mailto:") ? ("mail" as const) : ("telegram" as const),
+}));
+const year = new Date().getFullYear();
+/** Telegram already has its own route row above; the strip is for everything else. */
+const elsewhere = socials.filter((social) => social.href !== links.telegram);
+---
+
+<section id="contact" class="contact" aria-labelledby="contact-title">
+  <div class="sg-wrap">
+    <SectionHead id="contact-title" title="Contact" meta={`${contacts.length} direct routes`} />
+
+    <ul class="routes">
+      {
+        routes.map((route) => (
+          <li>
+            <a
+              href={route.href}
+              aria-label={route.label}
+              target={route.external ? "_blank" : undefined}
+              rel={route.external ? "noopener noreferrer" : undefined}
+            >
+              <Icon name={route.icon} size={22} class="cue" />
+              <span class="addr">{route.short}</span>
+              {route.external && <Icon name="arrow-ne" size={18} class="ne" />}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <ul class="socials">
+      {
+        elsewhere.map((social) => (
+          <li>
+            <a class="sg-label" href={social.href} target="_blank" rel="noopener noreferrer">
+              {social.short}
+              <Icon name="arrow-ne" size={12} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <footer>
+      <span class="sg-label">{`© ${year} ${identity.fullName}`}</span>
+      <span class="sg-label built">Built with Astro</span>
+    </footer>
+  </div>
+</section>
+
+<script is:inline>
+  (function initReturningUnit() {
+    try {
+      const KEY = "sg:visits";
+      const count = (parseInt(localStorage.getItem(KEY) || "0", 10) || 0) + 1;
+      localStorage.setItem(KEY, String(count));
+      if (count < 2) return;
+
+      const built = document.querySelector("#contact footer .built");
+      if (!built) return;
+
+      const unit = document.createElement("span");
+      unit.className = "unit";
+      unit.textContent = ` · unit ${String(count).padStart(4, "0")}`;
+      built.appendChild(unit);
+    } catch (_) {}
+  })();
+</script>
+
+<style lang="scss">
+  .contact {
+    padding-block: var(--section-gap) 0;
+    scroll-margin-top: 3rem;
+  }
+
+  .routes {
+    border-top: 1px solid var(--rule);
+  }
+
+  .routes li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .routes a {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1.125rem 0;
+    text-decoration: none;
+    color: var(--ink-1);
+    transition: background-color 0.18s var(--ease), color 0.18s var(--ease);
+  }
+
+  .addr {
+    font-family: var(--mono);
+    font-size: clamp(1.0625rem, 4.6vw, 2.125rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+
+  .cue {
+    color: var(--ink-3);
+    transition: color 0.18s var(--ease);
+  }
+
+  .ne {
+    margin-left: auto;
+    color: var(--ink-3);
+  }
+
+  .routes a:hover {
+    background: var(--surface);
+    color: var(--ink-0);
+  }
+
+  .routes a:hover .cue,
+  .routes a:hover .ne {
+    color: var(--ink-0);
+  }
+
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.75rem;
+    padding-top: 1.75rem;
+  }
+
+  .socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    text-decoration: none;
+    transition: color 0.18s var(--ease);
+  }
+
+  .socials a:hover {
+    color: var(--ink-0);
+  }
+
+  footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin-top: clamp(3rem, 7vw, 5rem);
+    padding-block: 1.25rem clamp(2rem, 5vw, 3.5rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .built .unit {
+    color: var(--ink-3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .routes a,
+    .socials a,
+    .cue {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,144 @@
+---
+import "../../styles/demos/broadsheet/fonts.css";
+import "@fontsource/inter/latin-400.css";
+import "@fontsource/inter/latin-600.css";
+
+import RunningHead from "../../components/demos/broadsheet/RunningHead.astro";
+import Masthead from "../../components/demos/broadsheet/Masthead.astro";
+import LeadHead from "../../components/demos/broadsheet/LeadHead.astro";
+import LeadBody from "../../components/demos/broadsheet/LeadBody.astro";
+import Portrait from "../../components/demos/broadsheet/Portrait.astro";
+import FactBox from "../../components/demos/broadsheet/FactBox.astro";
+import StackIndex from "../../components/demos/broadsheet/StackIndex.astro";
+import Ledger from "../../components/demos/broadsheet/Ledger.astro";
+import Upstream from "../../components/demos/broadsheet/Upstream.astro";
+import EditorsNote from "../../components/demos/broadsheet/EditorsNote.astro";
+import Colophon from "../../components/demos/broadsheet/Colophon.astro";
+
+import romanFont from "../../styles/demos/broadsheet/fonts/newsreader-latin-standard-normal.woff2?url";
+
+import { identity, seo } from "../../data/profile";
+
+const base = import.meta.env.BASE_URL;
+const title = `${identity.fullName} — ${identity.role}`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f5f1e8" />
+    <title>{title}</title>
+    <meta name="description" content={seo.description} />
+    <link rel="icon" href={`${base}favicon.svg`} />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href={romanFont}
+    />
+  </head>
+  <body>
+    <a class="skip" href="#lead">Skip to the lead story</a>
+    <RunningHead />
+    <main class="sheet">
+      <Masthead />
+      <section class="front" id="lead" aria-label={`${identity.fullName}, in brief`}>
+        <div class="front__head"><LeadHead /></div>
+        <aside class="front__aside" aria-label="Portrait and particulars">
+          <Portrait />
+          <FactBox />
+        </aside>
+        <div class="front__body"><LeadBody /></div>
+      </section>
+      <StackIndex />
+      <Ledger />
+      <Upstream />
+      <EditorsNote />
+      <Colophon />
+    </main>
+
+    <style lang="scss" is:global>
+      @use "demos/broadsheet/base";
+    </style>
+
+    <style lang="scss">
+      @use "demos/broadsheet/tokens" as *;
+
+      .skip {
+        @include furniture(0.6875rem);
+        position: absolute;
+        left: 0.75rem;
+        top: -4rem;
+        z-index: 20;
+        background: $ink;
+        color: $paper;
+        padding: 0.7rem 1rem;
+        text-decoration: none;
+        transition: top 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .skip:focus-visible {
+        top: 0.5rem;
+      }
+
+      .sheet {
+        position: relative;
+        z-index: 1;
+        width: min(100% - 2rem, 1240px);
+        margin-inline: auto;
+      }
+
+      .front {
+        display: grid;
+        row-gap: clamp(1.25rem, 3vw, 1.75rem);
+        padding-bottom: clamp(1rem, 3vw, 1.75rem);
+
+        @include bp(46rem) {
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+          grid-template-rows: auto 1fr;
+          column-gap: 1.75rem;
+          row-gap: 0;
+        }
+      }
+
+      .front__head {
+        @include bp(46rem) {
+          grid-column: 1 / 8;
+          grid-row: 1;
+        }
+      }
+
+      // The story column and the aside close on the same line: the coupons
+      // hang from the bottom of the column, level with the fact box.
+      .front__body {
+        display: flex;
+        flex-direction: column;
+
+        @include bp(46rem) {
+          grid-column: 1 / 8;
+          grid-row: 2;
+        }
+      }
+
+      .front__aside {
+        display: grid;
+        gap: clamp(1rem, 2.5vw, 1.35rem);
+        align-content: start;
+        padding-top: clamp(1.25rem, 3vw, 1.75rem);
+
+        @include bp(46rem) {
+          grid-column: 9 / -1;
+          grid-row: 1 / 3;
+          border-left: 1px solid $rule;
+          padding-left: 1.75rem;
+          margin-left: -0.875rem;
+        }
+      }
+    </style>
+  </body>
+</html>

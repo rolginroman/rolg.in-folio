@@ -1,0 +1,64 @@
+---
+import "../../styles/demos/quiet/base.scss";
+import inter from "../../styles/demos/quiet/fonts/inter-latin-variable-wghtOnly-normal.woff2";
+import { identity, seo } from "../../data/profile";
+import Topbar from "../../components/demos/quiet/Topbar.astro";
+import Identity from "../../components/demos/quiet/Identity.astro";
+import Section from "../../components/demos/quiet/Section.astro";
+import Stack from "../../components/demos/quiet/Stack.astro";
+import Work from "../../components/demos/quiet/Work.astro";
+import Upstream from "../../components/demos/quiet/Upstream.astro";
+import Contact from "../../components/demos/quiet/Contact.astro";
+
+const title = `${identity.fullName} — ${identity.role}`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={seo.description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f0f11" media="(prefers-color-scheme: dark)" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={inter} as="font" type="font/woff2" crossorigin="anonymous" />
+  </head>
+  <body>
+    <a class="q-skip" href="#main">Skip to content</a>
+    <Topbar />
+    <main id="main">
+      <Identity />
+      <Section id="stack" label="Stack">
+        <Stack />
+      </Section>
+      <Section id="work" label="Work">
+        <Work />
+      </Section>
+      <Section id="upstream" label="Upstream">
+        <Upstream />
+      </Section>
+      <Section id="contact" label="Contact">
+        <Contact />
+      </Section>
+    </main>
+    <footer class="foot">
+      <div class="q-wrap">
+        <p>Design demo — same facts as {identity.domain}, set quietly.</p>
+      </div>
+    </footer>
+    <style lang="scss">
+      .foot {
+        border-top: 1px solid var(--hair);
+        padding-block: var(--u5);
+        font-size: var(--t-micro);
+        letter-spacing: var(--track-label);
+        text-transform: uppercase;
+        color: var(--ink-3);
+      }
+    </style>
+  </body>
+</html>

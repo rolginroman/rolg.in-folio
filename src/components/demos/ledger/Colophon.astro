@@ -1,0 +1,70 @@
+---
+import { identity } from "../../../data/profile";
+---
+
+<footer class="colophon">
+  <div class="led-wrap inner">
+    <p class="line">
+      Design demo &mdash; the same facts as {identity.domain}, set as an index.
+    </p>
+    <dl class="specs">
+      <div>
+        <dt>Text</dt>
+        <dd>Recursive Variable, MONO 0</dd>
+      </div>
+      <div>
+        <dt>Metadata</dt>
+        <dd>Recursive Variable, MONO 1</dd>
+      </div>
+      <div>
+        <dt>Licence</dt>
+        <dd>SIL Open Font License 1.1</dd>
+      </div>
+    </dl>
+  </div>
+</footer>
+
+<style lang="scss">
+  .colophon {
+    margin-block-start: var(--u8);
+    border-top: 1px solid var(--ink);
+  }
+
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--u4) var(--u6);
+    padding-block: var(--u5) var(--u8);
+  }
+
+  .line {
+    font-size: var(--t-small);
+    color: var(--ink-2);
+  }
+
+  .specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--u2) var(--u5);
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--track-label);
+    color: var(--ink-3);
+  }
+
+  .specs div {
+    display: flex;
+    gap: 0.5em;
+  }
+
+  .specs dt {
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .specs dd {
+    margin: 0;
+  }
+</style>

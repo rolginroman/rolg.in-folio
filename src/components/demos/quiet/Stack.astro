@@ -1,0 +1,94 @@
+---
+import { techGroups, tech } from "../../../data/profile";
+
+/** Everything on the list that carries its own evidence, in data order. */
+const noted = tech.filter((item) => item.note);
+---
+
+<div class="stack">
+  {
+    techGroups.map((group) => (
+      <div class="group">
+        <h3 class="q-label">{group.label}</h3>
+        <ul class="run">
+          {group.items.map((item) => (
+            <li>{item.name}</li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+
+  <ul class="notes">
+    {
+      noted.map((item) => (
+        <li>
+          <span class="subject">{item.name}</span>
+          <span class="note">{item.note}</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style lang="scss">
+  .group + .group {
+    margin-top: var(--u5);
+  }
+
+  /* A run of type, not a grid of tiles: the eye reads it as one line of prose
+     and the wrap points fall wherever the measure decides. */
+  .run {
+    margin-top: var(--u2);
+    font-size: var(--t-body);
+    line-height: 1.7;
+    color: var(--ink);
+  }
+
+  .run li {
+    display: inline;
+  }
+
+  .run li + li::before {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--ink-3);
+    vertical-align: 0.3em;
+    margin-inline: 0.55em;
+  }
+
+  .notes {
+    margin-top: var(--u6);
+    padding-top: var(--u5);
+    border-top: 1px solid var(--hair);
+    display: grid;
+    gap: var(--u3);
+  }
+
+  .notes li {
+    display: grid;
+    gap: 0.15rem;
+    font-size: var(--t-small);
+    line-height: 1.6;
+  }
+
+  .subject {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .note {
+    color: var(--ink-3);
+  }
+
+  @media (min-width: 40rem) {
+    .notes li {
+      grid-template-columns: 9rem minmax(0, 1fr);
+      gap: var(--u4);
+      align-items: baseline;
+    }
+  }
+</style>

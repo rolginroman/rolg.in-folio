@@ -1,0 +1,282 @@
+/* LEDGER — the CV as an index. Rows, hairlines and aligned columns; no cards,
+   no icons, no shadows. One grid definition serves every row on the page.
+
+   Typeface: Recursive Variable — SIL Open Font License 1.1 — ArrowType
+   (Stephen Nixon) — https://github.com/arrowtype/recursive. Self-hosted, latin
+   subset, one file carrying the MONO (0 = proportional, 1 = monospace) and
+   wght axes. Full licence text is in ./fonts/OFL-NOTICE.md.
+
+   Why this face, against the research font catalogue: the catalogue's own
+   pairing note for Recursive is exactly this world's requirement — "single
+   variable file, Sans-axis for body, Mono-axis for metadata; one font file
+   doing both jobs via axis interpolation." The two typographic voices this
+   design needs are therefore one design at two axis positions, which is why
+   the metadata reads as a register of the same hand rather than as a second
+   family bolted on. It is also open-licensed, unlike the catalogue's other
+   character-forward options (Schnyder, GT Sectra, Basis Grotesque, Söhne). */
+
+@font-face {
+  font-family: "Recursive Variable";
+  src: url("./fonts/recursive-latin-MONO-wght.woff2") format("woff2-variations");
+  font-weight: 300 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Committed to one scheme. An index is a paper object; every reference that
+     actually is an index — klim, optimo, grillitype, usemodify — is light. */
+  color-scheme: light;
+
+  /* One family, two voices. The axis — not a second typeface — is what makes
+     metadata read as metadata, so the fallbacks stay split by role. */
+  --sans: "Recursive Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Recursive Variable", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  --axis-sans: "MONO" 0;
+  --axis-mono: "MONO" 1;
+
+  /* Type roles, not boxes. Six steps; the mono steps are fixed, because
+     metadata that resizes with the viewport stops reading as a column. */
+  --t-display: clamp(2rem, 1.6rem + 2vw, 2.75rem);
+  --t-lead: clamp(1.0625rem, 0.99rem + 0.4vw, 1.25rem);
+  --t-subject: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  --t-body: 1rem;
+  --t-small: 0.875rem;
+  --t-meta: 0.8125rem;
+  --t-label: 0.75rem;
+
+  --track-display: -0.02em;
+  --track-lead: -0.012em;
+  --track-row: 0;
+  --track-label: 0.06em;
+  --track-meta: 0.01em;
+
+  /* Near-monochrome, slightly warm paper. Contrast against --paper:
+     ink 17.91:1, ink-2 9.27:1, ink-3 5.15:1 (4.75:1 on the hover tint),
+     accent 7.46:1. Verified, not assumed. */
+  --paper: #fcfcfa;
+  --paper-sunk: #f3f3ee;
+  --ink: #141416;
+  --ink-2: #45454b;
+  --ink-3: #6b6b72;
+  --hair: #e2e2dc;
+  --hair-strong: #c4c4bd;
+  /* Leader dots sit between the two hairlines: present enough to carry the eye
+     across the row, quiet enough that the type still leads. */
+  --dot: #cfcfc8;
+
+  /* Exactly one accent, and it only ever means state: hover, focus, current.
+     It is never used to decorate, group or brand anything. */
+  --accent: #2544c8;
+
+  --u1: 0.25rem;
+  --u2: 0.5rem;
+  --u3: 0.75rem;
+  --u4: 1rem;
+  --u5: 1.5rem;
+  --u6: 2rem;
+  --u7: 3rem;
+  --u8: 4.5rem;
+  --section-gap: clamp(2.5rem, 5vw, 4rem);
+
+  --content-max: 68rem;
+  --measure: 68ch;
+  --gutter: clamp(1.25rem, 5vw, 2.5rem);
+  --col-gap: 1rem;
+
+  /* One row grid for the whole page. Narrow: number + everything else.
+     Wide: number | subject | leader | metadata. */
+  --c-num: 2.75rem;
+  --c-meta: 4.5rem;
+  --led-cols: var(--c-num) minmax(0, 1fr);
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --fast: 120ms;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --c-num: 3.5rem;
+    --col-gap: 1.25rem;
+    --led-cols: var(--c-num) minmax(0, auto) minmax(2rem, 1fr) minmax(var(--c-meta), auto);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: var(--u6);
+  /* The surfaces the browser draws belong to the world too. */
+  scrollbar-color: var(--hair-strong) var(--paper);
+  caret-color: var(--ink);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-variation-settings: var(--axis-sans);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: var(--track-row);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration-line: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hair-strong);
+  border: 3px solid var(--paper);
+  border-radius: 6px;
+}
+
+/* ---- shared primitives ---- */
+
+.led-wrap {
+  width: 100%;
+  max-width: calc(var(--content-max) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* The one grid definition. Everything below it re-enters the same tracks,
+   so a stack row, a project row and a contact row share column edges. */
+.led-grid {
+  display: grid;
+  grid-template-columns: var(--led-cols);
+  column-gap: var(--col-gap);
+  /* Both counters are opened here, once, so a counter's scope covers the whole
+     register and the entry numbers run straight through from the first row of
+     the first division to the last row of the last one. */
+  counter-reset: led sect;
+}
+
+/* Re-enters the parent's tracks. Below 48rem the tracks are fixed + 1fr, so a
+   plain repeat is pixel-identical; above it the subject track is content-sized
+   and only subgrid can keep the columns honest across sections. */
+.led-sub {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: var(--led-cols);
+  column-gap: var(--col-gap);
+}
+
+@supports (grid-template-columns: subgrid) {
+  @media (min-width: 48rem) {
+    .led-sub {
+      grid-template-columns: subgrid;
+    }
+  }
+}
+
+.led-full {
+  grid-column: 1 / -1;
+}
+
+.led-label {
+  font-family: var(--mono);
+  font-variation-settings: var(--axis-mono);
+  font-size: var(--t-label);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.led-num {
+  font-family: var(--mono);
+  font-variation-settings: var(--axis-mono);
+  font-size: var(--t-meta);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: inherit;
+  color: var(--ink-3);
+  transition: color var(--fast) var(--ease);
+}
+
+/* The number is generated from the list, never typed, so it stays honest when
+   an entry is added or removed. */
+.led-num::before {
+  content: counter(led, decimal-leading-zero);
+}
+
+.led-prose {
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+
+.led-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 30;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--t-small);
+  font-weight: 500;
+  padding: var(--u3) var(--u4);
+}
+
+.led-skip:focus {
+  left: var(--u2);
+  top: var(--u2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

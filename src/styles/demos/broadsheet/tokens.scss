@@ -1,0 +1,48 @@
+// Broadsheet — the type and ink tokens for this world only.
+// Nothing here reaches outside src/{pages,components,styles}/demos/broadsheet.
+
+// Ink on stock. Measured against #F5F1E8: ink 15.9:1, ink-soft 7.1:1, spot 6.3:1.
+$paper: #f5f1e8;
+$paper-deep: #ede7da;
+$paper-edge: #e4dccb;
+$ink: #1a1712;
+$ink-soft: #57503f;
+$spot: #a32e1c;
+$rule: #c9c0ad;
+
+// Newsreader carries an optical-size axis, so display and body are the same
+// family cut differently, the way a metal face used to be.
+$serif: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+$sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+// The page grid: twelve columns, one gutter, one hairline.
+$cols: 12;
+$measure: 66ch;
+
+@mixin rule($weight: 1px, $color: $rule) {
+  border-top: $weight solid $color;
+}
+
+// Running heads, datelines, captions, folios — the furniture voice.
+@mixin furniture($size: 0.6875rem) {
+  font-family: $sans;
+  font-size: $size;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+// Newsreader's opsz runs 6–72. Driving it by hand is the whole point.
+@mixin optical($opsz, $wght: 400) {
+  font-family: $serif;
+  font-variation-settings: "opsz" $opsz, "wght" $wght;
+  font-weight: $wght;
+}
+
+@mixin bp($min) {
+  @media (min-width: $min) {
+    @content;
+  }
+}

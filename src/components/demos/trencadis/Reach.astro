@@ -1,0 +1,228 @@
+---
+// The close: the two conversions at full size, the rest of the profile small.
+import InlineIcon from "../../InlineIcon.astro";
+import { contacts, identity, links, socials } from "../../../data/profile";
+import Shard from "./Shard.astro";
+import type { Tone } from "./tones";
+
+/** Show the address for e-mail, the actual redirect target for Telegram. */
+const readable = (href: string) => (href.startsWith("http") ? href.replace(/^https?:\/\//, "") : "");
+
+const routes = contacts.map((contact, i) => ({
+  ...contact,
+  tone: (i === 0 ? "ochre" : "cobalt") as Tone,
+  cut: i === 0 ? 3 : 5,
+  action: i === 0 ? "Write an e-mail" : "Open Telegram",
+  target: readable(contact.href) || contact.short,
+}));
+
+const year = new Date().getFullYear();
+---
+
+<section class="reach" id="contact" aria-labelledby="reach-title">
+  <div class="reach__head">
+    <h2 class="reach__title" id="reach-title">Two ways in</h2>
+    <p class="reach__lead">No form in between — the address and the handle.</p>
+  </div>
+
+  <div class="reach__routes">
+    {
+      routes.map((r) => (
+        <Shard
+          as="a"
+          tone={r.tone}
+          cut={r.cut}
+          class="route"
+          href={r.href}
+          aria-label={r.label}
+          {...(r.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
+          <span class="route__mark" aria-hidden="true">
+            <InlineIcon name={r.iconName} class="route__icon" aria-hidden="true" />
+          </span>
+          <span class="route__action">{r.action}</span>
+          <span class="route__target">{r.target}</span>
+        </Shard>
+      ))
+    }
+  </div>
+
+  <div class="reach__elsewhere">
+    <h3 class="reach__sub">Elsewhere</h3>
+    <ul class="socials">
+      {
+        socials.map((s, i) => (
+          <li>
+            <Shard
+              as="a"
+              tone="iron"
+              cut={(i % 6) + 1}
+              lot={i}
+              class="social"
+              href={s.href}
+              aria-label={s.label}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <InlineIcon name={s.iconName} class="social__icon" aria-hidden="true" />
+              <span class="social__name">{s.short}</span>
+            </Shard>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <footer class="colophon">
+    <p class="colophon__line">
+      {identity.fullName} &middot; {identity.location} &middot; {identity.domain}
+    </p>
+    <p class="colophon__line colophon__line--quiet">
+      &copy; {year} &middot; Built as a static Astro site &mdash;{" "}
+      <a href={links.projects.rolginfolio} target="_blank" rel="noopener noreferrer">read the source</a>.
+    </p>
+  </footer>
+</section>
+
+<style lang="scss">
+  @use "demos/trencadis/world" as w;
+
+  .reach__head {
+    max-width: 44ch;
+    margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+  }
+
+  .reach__title {
+    font-family: var(--tc-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 6vw, 3.1rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--tc-bone);
+  }
+
+  .reach__lead {
+    margin: 0.7rem 0 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--tc-bone-dim);
+  }
+
+  .reach__routes {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: minmax(0, 1fr);
+
+    @include w.wall {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .route {
+    // Same rule as the work plaques: a large face carrying text takes a quiet
+    // sheen, or the conic's boundary reads as a seam instead of a glaze.
+    --cut-lg: 2.1rem;
+    --sheen: 0.35;
+
+    :global(.shard__body) {
+      display: grid;
+      gap: 0.3rem;
+      padding: clamp(1.25rem, 3.5vw, 1.9rem);
+    }
+  }
+
+  .route__mark {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    margin-bottom: 0.5rem;
+    border-radius: 2px;
+    background: hsl(38 32% 93%);
+    color: hsl(24 45% 12%);
+    box-shadow: inset 0 0 0 1px hsl(24 30% 40% / 0.3);
+  }
+
+  .route__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .route__action {
+    font-family: var(--tc-display);
+    font-size: clamp(1.4rem, 4.2vw, 1.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+
+  .route__target {
+    font-size: 0.92rem;
+    letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
+  }
+
+  .reach__elsewhere {
+    margin-top: clamp(2rem, 5vw, 3rem);
+  }
+
+  .reach__sub {
+    margin: 0 0 0.8rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tc-bone-dim);
+  }
+
+  .socials {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .social {
+    font-size: 0.84rem;
+    font-weight: 600;
+
+    :global(.shard__body) {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.6rem 0.95rem;
+    }
+  }
+
+  .social__icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+  }
+
+  .colophon {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--tc-iron-line);
+  }
+
+  .colophon__line {
+    margin: 0 0 0.3rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--tc-bone-dim);
+  }
+
+  .colophon__line--quiet {
+    color: hsl(30 12% 55%);
+  }
+
+  .colophon a {
+    color: var(--tc-ochre-mark);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+</style>

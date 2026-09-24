@@ -1,0 +1,636 @@
+---
+// Selected work, set as enamelled plaques. A different material register from
+// the mosaic, so the wall's four glazes keep meaning "group" and nothing else.
+//
+// Ranking is carried by size and by glaze: the lead piece is a bone plaque
+// across the full width, the rest are iron and unequal. Equal shards would have
+// flattened exactly the thing this section exists to say.
+import InlineIcon from "../../InlineIcon.astro";
+import { bio, ndaNote, projects, upstream, upstreamStats } from "../../../data/profile";
+import Shard from "./Shard.astro";
+
+/** Column start / span and row start / span on the twelve-column wall. */
+type Cell = [number, number, number, number];
+
+const [lead, ...rest] = projects;
+
+// Hand-set, like the technology wall: the tiling is data, not a repeat().
+// Each plaque is sized to the story it has to tell, so no tile carries a void
+// where a `detail` would have been.
+const wall: Cell[] = [
+  [1, 7, 1, 1], // the SDK — a maintainer's story, the widest piece in the row
+  [8, 5, 1, 1], // the vesting platform
+  [1, 5, 2, 1], // the shipped product
+  [6, 7, 2, 1], // the measured skills — the harness needs the width to read
+  [1, 12, 3, 1], // the closing habit, set full width as the last word
+];
+
+// Breaks chosen to miss the corners the content uses: the `Open` affordance sits
+// bottom-right on every plaque that has one, so no plaque takes a deep bite out
+// of it. Read modulo, so a change in how many projects ship can never index past
+// the end.
+const cuts = [5, 2, 3, 6];
+
+const place = (c: Cell) => `--c:${c[0]};--cs:${c[1]};--r:${c[2]};--rs:${c[3]}`;
+
+// The tiling is written for exactly this many plaques. If the data grows or
+// shrinks, drop to auto-flow rather than leaving a hole in the wall.
+const tiled = (count: number) => count === wall.length;
+
+/**
+ * Stars mean nothing on a repository I do not own, so they are not shown. They
+ * are also absent — not zero — on private work, which has no public count, so a
+ * plaque without one simply does not set the fact.
+ */
+const showStars = (p: (typeof projects)[number]) => p.kind === "own" && p.stars !== undefined && p.stars > 0;
+
+// A plaque is fired the same way whether or not it opens onto anything. Private
+// work has no public URL, so that plaque is a `div`: it keeps its glaze, its
+// mark and its sentence, and drops the `Open` phrase and the out-arrow that are
+// this world's only statement that a tile is a link.
+const linkAttrs = (link?: string) =>
+  link ? { as: "a" as const, href: link, target: "_blank", rel: "noopener noreferrer" } : { as: "div" as const };
+
+const kindLabel = (k: string) => (k === "pr" ? "Pull request" : "Issue");
+---
+
+<section class="works" id="work" aria-labelledby="work-title">
+  <div class="works__head">
+    <h2 class="works__title" id="work-title">Selected work</h2>
+    {/* The standfirst has to cover the whole wall, and half of it is private
+        product work rather than open source, so it leads on the span of the
+        experience instead of on the licence. */}
+    <p class="works__lead">{bio[0]}</p>
+  </div>
+
+  {
+    lead && (
+      <Shard tone="bone" cut={5} class="lead" {...linkAttrs(lead.link)}>
+        <span class="lead__mark" aria-hidden="true">
+          {lead.mark}
+        </span>
+        <h3 class="lead__name">{lead.name}</h3>
+        <p class="lead__desc">{lead.description}</p>
+        {lead.detail && <p class="lead__detail">{lead.detail}</p>}
+        <ul class="lead__tags">
+          {lead.tags.map((t) => (
+            <li class="tag">{t}</li>
+          ))}
+        </ul>
+        <span class="lead__meta">
+          <span class="meta__fact">{lead.language}</span>
+          <span class="meta__fact">{lead.year}</span>
+          {lead.link && (
+            <span class="go">
+              Open on GitHub
+              <InlineIcon name="mdi:arrow-top-right" class="go__arrow" aria-hidden="true" />
+            </span>
+          )}
+        </span>
+      </Shard>
+    )
+  }
+
+  <div class="works__grid">
+    {
+      rest.map((p, i) => (
+        <Shard
+          tone="iron"
+          cut={cuts[i % cuts.length] ?? 1}
+          lot={i}
+          class={tiled(rest.length) ? "work" : "work work--loose"}
+          style={tiled(rest.length) ? place(wall[i]!) : ""}
+          {...linkAttrs(p.link)}
+        >
+          <span class="work__mark" aria-hidden="true">
+            {p.mark}
+          </span>
+          <h3 class="work__name">{p.name}</h3>
+          <p class="work__desc">{p.description}</p>
+          {p.detail && <p class="work__detail">{p.detail}</p>}
+          <span class="work__meta">
+            <span class="meta__fact">{p.language}</span>
+            <span class="meta__fact">{p.year}</span>
+            {showStars(p) && (
+              <span class="meta__fact meta__stars">
+                <InlineIcon name="mdi:star" class="meta__star" aria-hidden="true" />
+                {p.stars}
+              </span>
+            )}
+            {p.link && (
+              <span class="go go--compact">
+                Open
+                <InlineIcon name="mdi:arrow-top-right" class="go__arrow" aria-hidden="true" />
+              </span>
+            )}
+          </span>
+        </Shard>
+      ))
+    }
+  </div>
+
+  <div class="upstream">
+    <h3 class="upstream__title">Upstream</h3>
+    <p class="upstream__lead">
+      {upstreamStats.pullRequestsAuthored} pull requests authored outside my own repositories since {
+        upstreamStats.sinceYear
+      }, {upstreamStats.pullRequestsMerged} of them merged. Bugs I found in other people's code, each one checkable in a
+      click:
+    </p>
+
+    <ul class="ledger">
+      {
+        upstream.map((u, i) => (
+          <li>
+            <Shard
+              as="a"
+              tone="iron"
+              cut={(i % 6) + 1}
+              lot={i + 2}
+              class="entry"
+              href={u.link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="entry__repo">
+                {u.repo}
+                <span class="entry__number">#{u.number}</span>
+              </span>
+              <span class="entry__title">{u.title}</span>
+              <span class="entry__kind">{kindLabel(u.kind)}</span>
+              <InlineIcon name="mdi:arrow-top-right" class="entry__arrow" aria-hidden="true" />
+            </Shard>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <Shard tone="terra" cut={4} class="nda">
+    <p class="nda__lead">{ndaNote.lead}</p>
+    <p class="nda__body">{ndaNote.body}</p>
+    <a class="nda__cv" href={ndaNote.cvLink} target="_blank" rel="noopener noreferrer">
+      <InlineIcon name="mdi:tray-arrow-down" class="nda__icon" aria-hidden="true" />
+      <span>Download the {ndaNote.cvLabel}</span>
+    </a>
+  </Shard>
+</section>
+
+<style lang="scss">
+  @use "demos/trencadis/world" as w;
+
+  .works__head {
+    max-width: 48ch;
+    margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+  }
+
+  .works__title {
+    font-family: var(--tc-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 6vw, 3.1rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--tc-bone);
+  }
+
+  .works__lead {
+    margin: 0.7rem 0 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--tc-bone-dim);
+  }
+
+  // A glazed house-number tile. Two characters of Abril, fired into the plaque —
+  // the mark every repo has, rather than the logo only three of them have.
+  .lead__mark,
+  .work__mark {
+    justify-self: start;
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    font-family: var(--tc-display);
+    font-size: 1.15rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    border-radius: 2px;
+    background: linear-gradient(150deg, hsl(38 34% 95%), hsl(34 20% 82%));
+    color: hsl(24 45% 12%);
+    box-shadow:
+      inset 0 0 0 1px hsl(24 30% 40% / 0.28),
+      0 1px 2px hsl(20 40% 3% / 0.45);
+  }
+
+  .lead__mark {
+    width: 3.1rem;
+    height: 3.1rem;
+    font-size: 1.45rem;
+    background: linear-gradient(150deg, hsl(12 58% 46%), hsl(12 58% 33%));
+    color: hsl(38 40% 95%);
+  }
+
+  // The lead contribution: full width, the palest glaze on the page, and the
+  // only plaque that carries its tags.
+  .lead {
+    // The largest shard in the wall: the deepest breaks on the page, and the
+    // sheen pulled back so it never crosses the sentence that does the work.
+    --cut-sm: 1.35rem;
+    --cut-lg: 2.4rem;
+    --sheen: 0.3;
+
+    display: block;
+    margin-bottom: 6px;
+
+    :global(.shard__body) {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.55rem;
+      padding: clamp(1.25rem, 3.5vw, 2rem);
+    }
+  }
+
+  .lead__name {
+    font-family: var(--tc-display);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 5vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0.3rem 0 0;
+    overflow-wrap: anywhere;
+  }
+
+  .lead__desc {
+    margin: 0;
+    font-size: clamp(1.02rem, 2.6vw, 1.2rem);
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .lead__detail {
+    margin: 0;
+    max-width: 78ch;
+    font-size: 0.97rem;
+    line-height: 1.6;
+    color: hsl(24 28% 26%);
+  }
+
+  .lead__tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 0.35rem 0 0;
+    padding: 0;
+  }
+
+  .tag {
+    padding: 0.22rem 0.5rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: hsl(24 34% 22%);
+    background: hsl(34 22% 80%);
+    box-shadow: inset 0 0 0 1px hsl(24 25% 45% / 0.3);
+    clip-path: polygon(0.25rem 0, 100% 0, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0 100%, 0 0.25rem);
+  }
+
+  .works__grid {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: minmax(0, 1fr);
+
+    @include w.wall {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-auto-rows: minmax(8.5rem, auto);
+    }
+  }
+
+  .work {
+    --cut-sm: 1.15rem;
+    --cut-lg: 2rem;
+    --sheen: 0.32;
+
+    // Flex, not a fixed row template: a plaque with no `detail` has one child
+    // fewer, and `margin-top: auto` on the meta pins it to the bottom either way.
+    :global(.shard__body) {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+      padding: clamp(1.05rem, 2.6vw, 1.4rem);
+      min-height: 100%;
+    }
+
+    @include w.wall {
+      grid-column: var(--c) / span var(--cs);
+      grid-row: var(--r) / span var(--rs);
+    }
+  }
+
+  .work--loose {
+    @include w.wall {
+      grid-column: auto / span 6;
+      grid-row: auto;
+    }
+  }
+
+  .work__name {
+    font-family: var(--tc-display);
+    font-weight: 400;
+    font-size: 1.3rem;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
+  }
+
+  .work__desc {
+    margin: 0;
+    align-self: start;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .work__detail {
+    margin: 0;
+    align-self: start;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: hsl(36 14% 68%);
+  }
+
+  .lead__meta,
+  .work__meta {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 0.55rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .meta__fact {
+    opacity: 0.75;
+  }
+
+  .meta__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .meta__star {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  // Link affordance, stated and not implied: every plaque that opens onto
+  // something, and every ledger row, carries an underlined phrase and an
+  // out-arrow visible at rest — so a tile that is a link never looks like a tile
+  // that is not, and a plaque with no phrase is plainly not one.
+  .go {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.28em;
+    text-decoration-color: currentColor;
+  }
+
+  .go__arrow {
+    width: 0.95rem;
+    height: 0.95rem;
+    transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .lead .go {
+    color: hsl(12 62% 34%);
+  }
+
+  .work .go {
+    color: var(--tc-ochre-mark);
+  }
+
+  .lead:hover .go__arrow,
+  .lead:focus-visible .go__arrow,
+  .work:hover .go__arrow,
+  .work:focus-visible .go__arrow,
+  .entry:hover .entry__arrow,
+  .entry:focus-visible .entry__arrow {
+    transform: translate(2px, -2px);
+  }
+
+  .lead:hover .go,
+  .lead:focus-visible .go,
+  .work:hover .go,
+  .work:focus-visible .go {
+    text-decoration-thickness: 2px;
+  }
+
+  .upstream {
+    margin-top: clamp(2.25rem, 5vw, 3.25rem);
+  }
+
+  .upstream__title {
+    font-family: var(--tc-display);
+    font-weight: 400;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0;
+    color: var(--tc-bone);
+  }
+
+  .upstream__lead {
+    margin: 0.6rem 0 1.1rem;
+    max-width: 72ch;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--tc-bone-dim);
+  }
+
+  .ledger {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 5px;
+  }
+
+  .entry {
+    // Shallow breaks: a ledger row is short, so a deep cut would eat a corner
+    // rather than read as one.
+    --cut-sm: 0.5rem;
+    --cut-lg: 0.95rem;
+    --sheen: 0.3;
+
+    :global(.shard__body) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 1rem;
+      row-gap: 0.25rem;
+      padding: 0.9rem clamp(0.95rem, 2.4vw, 1.3rem);
+    }
+  }
+
+  .entry__repo {
+    grid-column: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: hsl(36 14% 66%);
+  }
+
+  .entry__number {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--tc-ochre-mark);
+  }
+
+  .entry__title {
+    grid-column: 1;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--tc-bone);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    text-decoration-color: hsl(36 20% 45%);
+  }
+
+  .entry:hover .entry__title,
+  .entry:focus-visible .entry__title {
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--tc-ochre-mark);
+  }
+
+  .entry__kind {
+    grid-column: 1;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: hsl(36 12% 56%);
+  }
+
+  .entry__arrow {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    color: var(--tc-ochre-mark);
+    transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nda {
+    --cut-lg: 2.1rem;
+    --sheen: 0.35;
+
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+
+    :global(.shard__body) {
+      display: grid;
+      gap: 0.45rem;
+      padding: clamp(1.25rem, 3.5vw, 1.9rem);
+
+      @include w.wall {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: 2rem;
+      }
+    }
+  }
+
+  .nda__lead {
+    margin: 0;
+    font-family: var(--tc-display);
+    font-size: clamp(1.3rem, 4vw, 1.75rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+
+    @include w.wall {
+      grid-column: 1;
+      grid-row: 1;
+    }
+  }
+
+  .nda__body {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    max-width: 56ch;
+    color: hsl(24 40% 93%);
+
+    @include w.wall {
+      grid-column: 1;
+      grid-row: 2;
+    }
+  }
+
+  .nda__cv {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+    padding: 0.7rem 1.1rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: hsl(24 45% 10%);
+    background: linear-gradient(150deg, hsl(38 34% 94%), hsl(34 22% 83%));
+    box-shadow:
+      inset 1px 1px 0 hsl(0 0% 100% / 0.5),
+      0 3px 8px -3px hsl(20 40% 2% / 0.6);
+    clip-path: polygon(0.6rem 0, 100% 0, 100% calc(100% - 0.6rem), calc(100% - 0.6rem) 100%, 0 100%, 0 0.6rem);
+    text-decoration: none;
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover,
+    &:focus-visible {
+      transform: translateY(-2px);
+    }
+
+    @include w.wall {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      margin-top: 0;
+    }
+  }
+
+  .nda__icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  @include w.calm {
+    .go__arrow,
+    .entry__arrow,
+    .nda__cv {
+      transition: none;
+    }
+
+    .lead:hover .go__arrow,
+    .work:hover .go__arrow,
+    .entry:hover .entry__arrow,
+    .nda__cv:hover,
+    .nda__cv:focus-visible {
+      transform: none;
+    }
+  }
+</style>

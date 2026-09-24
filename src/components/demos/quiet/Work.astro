@@ -1,0 +1,48 @@
+---
+import { projects, ndaNote } from "../../../data/profile";
+import Entry from "./Entry.astro";
+
+const KIND_LABEL = { work: "Contribution", own: "Own repository" } as const;
+
+const entries = projects.map((project) => ({
+  title: project.name,
+  href: project.link,
+  summary: project.description,
+  detail: project.detail,
+  meta: [
+    KIND_LABEL[project.kind],
+    project.language,
+    String(project.year),
+    // Only public repositories have a star count; private work has none to give.
+    project.stars ? `${project.stars} stars` : null,
+  ].filter((value): value is string => value !== null),
+}));
+
+/** Keep the note verbatim; only the word "CV" becomes the link to it. */
+const [beforeCv, afterCv] = ndaNote.body.split(ndaNote.cvLabel);
+---
+
+<ul class="list">
+  {entries.map((entry) => <Entry {...entry} />)}
+</ul>
+
+<p class="nda">
+  {`${ndaNote.lead} ${beforeCv}`}<a href={ndaNote.cvLink} target="_blank" rel="noopener noreferrer"
+    >{ndaNote.cvLabel}</a
+  >{afterCv}
+</p>
+
+<style lang="scss">
+  .list {
+    display: block;
+  }
+
+  .nda {
+    margin-top: var(--u6);
+    padding-top: var(--u5);
+    border-top: 1px solid var(--hair);
+    font-size: var(--t-small);
+    line-height: 1.65;
+    color: var(--ink-3);
+  }
+</style>

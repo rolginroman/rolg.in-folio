@@ -1,0 +1,125 @@
+// Trencadís — shared SCSS for the demo world.
+// Emits no CSS on its own: mixins and breakpoints only, so every component can
+// @use it without duplicating declarations. Design tokens live as custom
+// properties in the route's global block.
+
+$bp-wall: 62rem; // the mosaic gains its twelve-column tiling here
+$bp-wide: 80rem;
+
+@mixin wall {
+  @media (min-width: $bp-wall) {
+    @content;
+  }
+}
+
+@mixin wide {
+  @media (min-width: $bp-wide) {
+    @content;
+  }
+}
+
+@mixin calm {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+// The glaze lots this world is fired in. Each carries the ink that stays
+// legible on it, so contrast is a property of the lot and not of the caller.
+@mixin tones {
+  &[data-tone="cobalt"] {
+    --gl-h: 198;
+    --gl-s: 52%;
+    --gl-l: 28%;
+    --gl-ink: var(--tc-bone);
+  }
+  &[data-tone="verd"] {
+    --gl-h: 166;
+    --gl-s: 38%;
+    --gl-l: 26%;
+    --gl-ink: var(--tc-bone);
+  }
+  &[data-tone="terra"] {
+    --gl-h: 12;
+    --gl-s: 56%;
+    --gl-l: 37%;
+    --gl-ink: var(--tc-bone);
+  }
+  &[data-tone="ochre"] {
+    --gl-h: 38;
+    --gl-s: 62%;
+    --gl-l: 54%;
+    --gl-ink: var(--tc-ink-dark);
+  }
+  &[data-tone="bone"] {
+    --gl-h: 38;
+    --gl-s: 30%;
+    --gl-l: 88%;
+    --gl-ink: var(--tc-ink-dark);
+  }
+  &[data-tone="iron"] {
+    --gl-h: 20;
+    --gl-s: 9%;
+    --gl-l: 16%;
+    --gl-ink: var(--tc-bone);
+  }
+}
+
+// The glazed surface of a fired tile: body colour, kiln sheen, bevelled edge.
+// Reads --gl-h/--gl-s/--gl-l/--jit from the element it is applied within.
+@mixin glaze {
+  --gl-base: calc(var(--gl-l) - var(--jit, 0%));
+
+  background-image:
+    // specular sweep the kiln leaves across the glaze
+    // Kiln sheen. `--sheen` dials it per surface: full strength on the small
+    // tiles of a wall, low on a plaque whose face carries a block of text, where
+    // the conic's straight boundary reads as a seam across the words.
+    conic-gradient(
+        from var(--glaze-from, 196deg) at 32% 18%,
+        hsl(0 0% 100% / calc(0.17 * var(--sheen, 1))),
+        hsl(0 0% 100% / 0) 26%,
+        hsl(0 0% 0% / calc(0.1 * var(--sheen, 1))) 54%,
+        hsl(0 0% 100% / calc(0.05 * var(--sheen, 1))) 76%,
+        hsl(0 0% 100% / 0) 100%
+      ),
+    // the glaze body itself
+    linear-gradient(
+        152deg,
+        hsl(var(--gl-h) var(--gl-s) calc(var(--gl-base) + 4%)) 0%,
+        hsl(var(--gl-h) var(--gl-s) var(--gl-base)) 46%,
+        hsl(calc(var(--gl-h) - 7) calc(var(--gl-s) + 4%) calc(var(--gl-base) - 6%)) 100%
+      );
+  box-shadow:
+    inset 1px 1px 0 hsl(0 0% 100% / 0.26),
+    inset -1px -1px 0 hsl(20 30% 4% / 0.42),
+    inset 0 -1.1rem 1.6rem -1.2rem hsl(20 40% 3% / 0.5);
+}
+
+// Broken-edge geometry. Cuts are straight and parallel across the set, so the
+// tiles stay aligned while no two share a silhouette — the trencadís rule.
+@mixin cuts {
+  --cut: var(--cut-sm, 0.85rem);
+  --cut-b: var(--cut-lg, 1.5rem);
+
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+
+  &[data-cut="1"] {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-b)), calc(100% - var(--cut-b)) 100%, 0 100%);
+  }
+  &[data-cut="2"] {
+    clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut));
+  }
+  &[data-cut="3"] {
+    clip-path: polygon(0 0, calc(100% - var(--cut-b)) 0, 100% var(--cut-b), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  }
+  &[data-cut="4"] {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cut-b) 100%, 0 calc(100% - var(--cut-b)));
+  }
+  &[data-cut="5"] {
+    clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%, 0 var(--cut));
+  }
+  &[data-cut="6"] {
+    clip-path: polygon(0 var(--cut), var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  }
+}

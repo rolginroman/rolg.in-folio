@@ -1,0 +1,26 @@
+---
+import { ndaNote } from "../../../data/profile";
+
+/** Keep the note verbatim; only the word "CV" becomes the link to it. */
+const [beforeCv, afterCv] = ndaNote.body.split(ndaNote.cvLabel);
+---
+
+<p>
+  {`${ndaNote.lead} ${beforeCv}`}<a href={ndaNote.cvLink} target="_blank" rel="noopener noreferrer"
+    >{ndaNote.cvLabel}</a
+  >{afterCv}
+</p>
+
+<style lang="scss">
+  a {
+    border-bottom: 1px solid var(--hair-strong);
+    transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+  }
+</style>

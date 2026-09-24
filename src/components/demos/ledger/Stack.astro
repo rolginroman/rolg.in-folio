@@ -1,0 +1,29 @@
+---
+import { techGroups } from "../../../data/profile";
+import Row from "./Row.astro";
+
+/**
+ * One flat run, with the cluster kept as the trailing column rather than as a
+ * sub-heading: the taxonomy stays visible as text, the way an archive exposes
+ * its facets, and the rows never break out of the page grid. A repeated key is
+ * printed once per run, as a register would — the blank means "same as above".
+ */
+const entries = techGroups.flatMap((group) =>
+  group.items.map((item, index) => ({
+    name: item.name,
+    group: index === 0 ? group.label : undefined,
+    note: item.note,
+  }))
+);
+---
+
+{
+  entries.map((entry, index) => (
+    <Row
+      id={`stack-${index + 1}`}
+      title={entry.name}
+      meta={entry.group}
+      note={entry.note}
+    />
+  ))
+}

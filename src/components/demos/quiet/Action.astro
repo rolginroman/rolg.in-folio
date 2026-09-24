@@ -1,0 +1,85 @@
+---
+import InlineIcon from "../../InlineIcon.astro";
+
+export interface Props {
+  href: string;
+  /** `solid` is the one filled element in the world; keep it to conversions. */
+  variant?: "solid" | "text";
+  /** Iconify name from src/data/icons.ts. Small, set at ink colour. */
+  icon?: string;
+  class?: string;
+}
+
+const { href, variant = "text", icon, class: klass } = Astro.props;
+/** mailto: and in-page targets stay in the tab; real destinations open away. */
+const external = /^https?:/.test(href);
+const target = external ? "_blank" : undefined;
+const rel = external ? "noopener noreferrer" : undefined;
+---
+
+<a
+  href={href}
+  class:list={["action", variant, klass]}
+  target={target}
+  rel={rel}
+>
+  <span class="label"><slot /></span>
+  {icon && <InlineIcon name={icon} class="mark" />}
+</a>
+
+<style lang="scss">
+  .action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    font-size: var(--t-small);
+    font-weight: 500;
+    letter-spacing: var(--track-body);
+    line-height: 1.2;
+    text-decoration-line: none;
+    transition: background-color var(--fast) var(--ease-out),
+      color var(--fast) var(--ease-out), border-color var(--fast) var(--ease-out),
+      transform var(--fast) var(--ease-out);
+  }
+
+  .mark {
+    font-size: 1em;
+    color: inherit;
+    flex: none;
+  }
+
+  .solid {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+  }
+
+  .text {
+    color: var(--ink);
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--hair-strong);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .solid:hover {
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    .text:hover {
+      border-bottom-color: var(--ink);
+    }
+  }
+
+  .action:active {
+    transform: scale(0.98);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .action:active {
+      transform: none;
+    }
+  }
+</style>

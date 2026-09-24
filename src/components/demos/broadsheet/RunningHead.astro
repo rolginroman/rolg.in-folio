@@ -1,0 +1,100 @@
+---
+import { identity, links } from "../../../data/profile";
+---
+
+<header class="running">
+  <div class="running__inner">
+    <a class="running__domain" href="#masthead">{identity.domain}</a>
+    <p class="running__desk">{identity.role}</p>
+    <nav class="running__exits" aria-label="Primary actions">
+      <a class="running__exit running__exit--ink" href={links.cv} rel="noopener">
+        <span class="running__exit-long">Download&nbsp;</span>CV
+      </a>
+      <a class="running__exit" href={`mailto:${links.mail}?subject=Hi%20Roman%2C%20I%20have%20a%20question.`}>
+        E&#8209;mail
+      </a>
+    </nav>
+  </div>
+</header>
+
+<style lang="scss">
+  @use "demos/broadsheet/tokens" as *;
+
+  .running {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: $paper;
+    border-bottom: 1px solid $rule;
+  }
+
+  .running__inner {
+    width: min(100% - 2rem, 1240px);
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.75rem;
+  }
+
+  .running__domain {
+    @include furniture(0.6875rem);
+    letter-spacing: 0.2em;
+    text-decoration: none;
+    padding: 0.35rem 0;
+  }
+
+  .running__desk {
+    display: none;
+    @include furniture(0.625rem);
+    color: $ink-soft;
+    letter-spacing: 0.15em;
+
+    @include bp(64rem) {
+      display: block;
+    }
+  }
+
+  .running__exits {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-right: -0.7rem;
+  }
+
+  .running__exit {
+    @include furniture(0.6875rem);
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 0.7rem;
+    text-decoration: none;
+    color: $spot;
+    transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .running__exit:hover {
+    background: $paper-deep;
+  }
+
+  .running__exit--ink {
+    color: $ink;
+    border-left: 1px solid $rule;
+    border-right: 1px solid $rule;
+    margin-right: 0.7rem;
+  }
+
+  .running__exit--ink:hover {
+    background: $spot;
+    color: $paper;
+  }
+
+  .running__exit-long {
+    display: none;
+
+    @include bp(26rem) {
+      display: inline;
+    }
+  }
+</style>

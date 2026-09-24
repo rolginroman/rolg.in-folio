@@ -1,0 +1,64 @@
+---
+import { projects } from "../../../data/profile";
+import Row from "./Row.astro";
+
+const KIND_LABEL = { work: "Contribution", own: "Own repository" } as const;
+
+const entries = projects.map((project, index) => ({
+  id: `work-${index + 1}`,
+  ...project,
+  /** Stars exist only where a public repository exists to count them. The tag
+      list repeats the language on some entries; print each facet once. */
+  facets: [
+    KIND_LABEL[project.kind],
+    project.language,
+    project.stars ? `${project.stars} stars` : null,
+    ...project.tags,
+  ]
+    .filter((value): value is string => value !== null)
+    .filter(
+      (value, index, all) =>
+        all.findIndex((other) => other.toLowerCase() === value.toLowerCase()) === index
+    ),
+}));
+---
+
+{
+  entries.map((entry) => (
+    <Row
+      id={entry.id}
+      title={entry.name}
+      href={entry.link}
+      meta={String(entry.year)}
+      note={entry.description}
+    >
+      <p>{entry.detail}</p>
+      <p class="facets">
+        {entry.facets.map((facet, index) => (
+          <>
+            {index > 0 && <span class="sep"> / </span>}
+            {facet}
+          </>
+        ))}
+      </p>
+    </Row>
+  ))
+}
+
+
+<style lang="scss">
+  .facets {
+    margin-block-start: var(--u2);
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--track-meta);
+    line-height: 1.6;
+    color: var(--ink-3);
+  }
+
+  .sep {
+    color: var(--ink-3);
+  }
+
+</style>

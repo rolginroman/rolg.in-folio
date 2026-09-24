@@ -1,0 +1,154 @@
+---
+/**
+ * A division of the register. It re-enters the page grid rather than opening a
+ * container of its own, so its heading number sits in the same column as every
+ * row number below it.
+ */
+export interface Props {
+  id: string;
+  label: string;
+  /** How many entries the division holds. Counted from the data, never typed. */
+  count: number;
+}
+
+const { id, label, count } = Astro.props;
+const headingId = `${id}-head`;
+const hasLead = Astro.slots.has("lead");
+const hasNote = Astro.slots.has("note");
+---
+
+<section id={id} class="section led-sub" aria-labelledby={headingId}>
+  <header class="head led-sub">
+    <span class="idx" aria-hidden="true"></span>
+    <h2 id={headingId} class="title">{label}</h2>
+    <span class="leader" aria-hidden="true"></span>
+    <span class="count">{count}</span>
+  </header>
+
+  {
+    hasLead && (
+      <div class="lead led-full led-prose">
+        <slot name="lead" />
+      </div>
+    )
+  }
+
+  <ul class="rows led-sub">
+    <slot />
+  </ul>
+
+  {
+    /* Closing prose, kept outside the list so the row count a screen reader
+       announces matches the number printed in the heading. */
+    hasNote && (
+      <div class="note led-full led-prose">
+        <slot name="note" />
+      </div>
+    )
+  }
+</section>
+
+<style lang="scss">
+  .section {
+    padding-block-start: var(--section-gap);
+    counter-increment: sect;
+  }
+
+  .head {
+    align-items: baseline;
+    background-color: var(--paper);
+    row-gap: var(--u1);
+    padding-block-end: var(--u3);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .idx {
+    grid-column: 1;
+    grid-row: 1;
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-meta);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .idx::before {
+    content: counter(sect, decimal-leading-zero);
+  }
+
+  .title {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: var(--t-lead);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: var(--track-lead);
+    color: var(--ink);
+  }
+
+  .leader {
+    display: none;
+    grid-column: 3;
+    grid-row: 1;
+    height: 2px;
+    background-image: radial-gradient(circle at center, var(--dot) 0.9px, transparent 1px);
+    background-size: 0.45rem 2px;
+    background-repeat: repeat-x;
+    background-position: 0 100%;
+  }
+
+  .count {
+    grid-column: 2;
+    grid-row: 2;
+    font-family: var(--mono);
+    font-variation-settings: var(--axis-mono);
+    font-size: var(--t-label);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .count::after {
+    content: " entries";
+  }
+
+  .lead {
+    padding-block: var(--u4) var(--u2);
+    font-size: var(--t-small);
+    line-height: 1.65;
+    color: var(--ink-2);
+  }
+
+  .rows {
+    padding-block-start: var(--u1);
+  }
+
+  .note {
+    padding-block-start: var(--u5);
+    font-size: var(--t-small);
+    line-height: 1.65;
+    color: var(--ink-3);
+  }
+
+  @media (min-width: 48rem) {
+    .leader {
+      display: block;
+    }
+
+    .leader {
+      grid-column: 3 / -1;
+    }
+
+    .count {
+      grid-column: 4;
+      grid-row: 1;
+      justify-self: end;
+      white-space: nowrap;
+      background-color: inherit;
+      padding-inline-start: 0.5rem;
+    }
+  }
+</style>
