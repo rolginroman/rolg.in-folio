@@ -5,7 +5,7 @@ import grotesk from "../styles/fonts/space-grotesk-latin-var.woff2";
 import mono400 from "../styles/fonts/space-mono-latin-400.woff2";
 import mono700 from "../styles/fonts/space-mono-latin-700.woff2";
 import { SEO } from "astro-seo";
-import { identity, seo } from "../data/profile";
+import { seo } from "../data/profile";
 import Rail from "@/signal/Rail.astro";
 import ActionBar from "@/signal/ActionBar.astro";
 
@@ -16,7 +16,8 @@ export interface Props {
 
 const baseUrl = import.meta.env.BASE_URL;
 const fonts = [doto, grotesk, mono400, mono700];
-const { title = `${identity.fullName} — ${identity.role}`, description = seo.description } = Astro.props;
+const { title = seo.title, description = seo.description } = Astro.props;
+const ogImage = new URL(`${baseUrl}og-image.png`, Astro.site).href;
 ---
 
 <!DOCTYPE html>
@@ -34,14 +35,14 @@ const { title = `${identity.fullName} — ${identity.role}`, description = seo.d
         basic: {
           title,
           type: "website",
-          image: `${baseUrl}og-image.png`,
+          image: ogImage,
         },
       }}
       twitter={{
         creator: seo.twitterCreator,
         title,
         description: seo.twitterDescription,
-        image: `${baseUrl}og-image.png`,
+        image: ogImage,
         imageAlt: seo.imageAlt,
       }}
       extend={{
