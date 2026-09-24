@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon";
-import { links } from "src/const";
+import { links, yearsOfExperience } from "src/const";
 import ProjectCard from "../blocks/ProjectCard.astro";
 
 const { class: classNames, ...rest } = Astro.props;
@@ -36,7 +36,7 @@ const projects = [
 <section class="projects" {...rest}>
   <h2>Projects</h2><h3>Things I&rsquo;ve worked on&nbsp;in&nbsp;the recent past</h3>
   <article>
-    <p>Experienced software engineer with 8+&nbsp;years in&nbsp;web development.</p>
+    <p>Experienced software engineer with {yearsOfExperience}+&nbsp;years in&nbsp;web development.</p>
     <p>
       Proficient in&nbsp;Angular, TypeScript, system architecture. My&nbsp;true passion lies in&nbsp;creating
       user-centric designs, optimizing&nbsp;UX, and driving business metrics through a&nbsp;combination

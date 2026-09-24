@@ -1,3 +1,6 @@
+export const careerStartYear = 2014;
+export const yearsOfExperience = new Date().getFullYear() - careerStartYear;
+
 export const links = {
   twitter: "https://l.rolg.in/twitter",
   linkedin: "https://l.rolg.in/linkedin",
