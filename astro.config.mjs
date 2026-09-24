@@ -19,9 +19,6 @@ export default defineConfig({
     sitemap({
       lastmod: new Date(),
       changefreq: "monthly",
-      // @astrojs/sitemap 1.x applies `filter` to page URLs only and then merges the
-      // unfiltered route URLs back in, so noindex demo pages are dropped here instead.
-      serialize: (item) => (item.url.includes("/demos") ? undefined : item),
     }),
     robotsSitemap(),
     critters({
