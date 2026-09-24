@@ -16,13 +16,13 @@ const kindLabel = { issue: "Issue", pr: "Merged PR" } as const;
     {upstreamStats.pullRequestsAuthored} pull requests authored outside my own repositories since {
       upstreamStats.sinceYear
     }, {upstreamStats.pullRequestsMerged} of them merged. Every line below opens on
-    <a class="wire__inline" href={links.github} rel="noopener" target="_blank">GitHub</a>.
+    <a class="wire__inline" href={links.github} rel="noopener noreferrer" target="_blank">GitHub</a>.
   </p>
   <ol class="wire__list">
     {
       upstream.map((report) => (
         <li class="report">
-          <a class="report__link" href={report.link} rel="noopener" target="_blank">
+          <a class="report__link" href={report.link} rel="noopener noreferrer" target="_blank">
             <span class="report__repo">{report.repo}</span>
             <span class="report__num">#{report.number}</span>
             <span class="report__headline">{headline(report.title, report.kind)}</span>

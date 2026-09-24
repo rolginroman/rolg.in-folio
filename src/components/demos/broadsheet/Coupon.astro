@@ -14,7 +14,7 @@ const { href, label, note, variant = "outline", external = false } = Astro.props
 <a
   class={`coupon coupon--${variant}`}
   href={href}
-  rel={external ? "noopener" : undefined}
+  rel={external ? "noopener noreferrer" : undefined}
   target={external ? "_blank" : undefined}
 >
   <span class="coupon__label">{label}</span>

@@ -22,7 +22,7 @@ const tally = (project: Project) =>
 // private work with no public URL, so they are set as the same story or brief
 // and simply lose the link — the copy is the item, the anchor was only ever a
 // convenience on top of it.
-const linkAttrs = (link?: string) => (link ? { href: link, rel: "noopener", target: "_blank" } : {});
+const linkAttrs = (link?: string) => (link ? { href: link, rel: "noopener noreferrer", target: "_blank" } : {});
 ---
 
 <section class="ledger" id="work" aria-labelledby="ledger-title">

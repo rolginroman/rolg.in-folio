@@ -51,7 +51,7 @@ const year = new Date().getFullYear();
         {
           socials.map((social) => (
             <li>
-              <a class="elsewhere__link" href={social.href} rel="me noopener" target="_blank">
+              <a class="elsewhere__link" href={social.href} rel="me noopener noreferrer" target="_blank">
                 {social.short}
               </a>
             </li>
@@ -67,7 +67,7 @@ const year = new Date().getFullYear();
   <p class="folio__cell">Set in Newsreader &amp; Inter</p>
   <p class="folio__cell">
     Built with Astro &mdash;
-    <a href={links.projects.rolginfolio} rel="noopener" target="_blank">read the source</a>
+    <a href={links.projects.rolginfolio} rel="noopener noreferrer" target="_blank">read the source</a>
   </p>
 </footer>
 

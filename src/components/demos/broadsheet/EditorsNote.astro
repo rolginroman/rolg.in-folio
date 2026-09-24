@@ -10,7 +10,7 @@ const [beforeCv, afterCv] = ndaNote.body.split(ndaNote.cvLabel);
     <span class="note__lead">{ndaNote.lead}</span>{" "}{beforeCv}<a
       class="note__link"
       href={ndaNote.cvLink}
-      rel="noopener"
+      rel="noopener noreferrer"
       target="_blank">{ndaNote.cvLabel}</a
     >{afterCv}
   </p>
