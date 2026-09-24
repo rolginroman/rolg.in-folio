@@ -1,0 +1,264 @@
+---
+import { identity } from "../../../data/profile";
+
+interface NavItem {
+  href: string;
+  label: string;
+}
+
+const nav: NavItem[] = [
+  { href: "#identity", label: "Identity" },
+  { href: "#stack", label: "Stack" },
+  { href: "#work", label: "Work" },
+  { href: "#contact", label: "Contact" },
+];
+---
+
+<header class="rail">
+  <div class="sg-wrap inner">
+    <span class="sg-label mark">{identity.domain}</span>
+    <nav aria-label="Sections">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a class="sg-label" href={item.href}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <span class="latch" aria-hidden="true"></span>
+    </nav>
+    <span class="sg-label place">{identity.location}</span>
+  </div>
+</header>
+
+<style lang="scss">
+  .rail {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 3rem;
+  }
+
+  .mark {
+    color: var(--ink-1);
+    font-weight: 700;
+  }
+
+  nav {
+    display: none;
+    position: relative;
+  }
+
+  ul {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0;
+  }
+
+  .latch {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 0.25em);
+    width: 1px;
+    height: 1px;
+    background: var(--accent);
+    transform: translate3d(0, 0, 0) scaleX(0);
+    transform-origin: left center;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.24s var(--ease);
+  }
+
+  nav a {
+    text-decoration: none;
+    transition: color 0.18s var(--ease);
+  }
+
+  nav a:hover {
+    color: var(--ink-0);
+  }
+
+  nav a[aria-current="location"] {
+    color: var(--ink-1);
+  }
+
+  .place {
+    text-align: right;
+  }
+
+  /* between 48rem and 64rem the nav needs the room the location was using */
+  @media (min-width: 48rem) and (max-width: 63.99rem) {
+    .place {
+      display: none;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    nav {
+      display: block;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    ul {
+      gap: 1.75rem;
+    }
+
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    nav a {
+      transition: none;
+    }
+
+    .latch {
+      transition: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    function initSectionLatch() {
+      try {
+        if (!("IntersectionObserver" in window)) return;
+
+        const RAIL_H = 48;
+        const sectionIds = ["identity", "stack", "work", "contact"];
+        const sections = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
+        const nav = document.querySelector(".rail nav");
+        const latch = nav?.querySelector(".latch");
+        if (!nav || !latch || sections.length === 0) return;
+
+        const links = new Map(
+          [...nav.querySelectorAll('a[href^="#"]')].map((link) => [
+            link.getAttribute("href").slice(1),
+            link,
+          ])
+        );
+
+        const visible = new Map(sectionIds.map((id) => [id, false]));
+        let currentId = "";
+        let latchReady = false;
+        let rafId = 0;
+        let pageBottom = 0;
+
+        function navMeasurable() {
+          return nav.offsetParent !== null && nav.offsetWidth > 0;
+        }
+
+        function measureLink(link) {
+          if (link.offsetParent === nav) {
+            return { x: link.offsetLeft, w: link.offsetWidth };
+          }
+          const navRect = nav.getBoundingClientRect();
+          const linkRect = link.getBoundingClientRect();
+          return {
+            x: linkRect.left - navRect.left,
+            w: linkRect.width,
+          };
+        }
+
+        function placeLatch(id, animate) {
+          const link = links.get(id);
+          if (!link || !navMeasurable()) return;
+
+          const { x, w } = measureLink(link);
+          if (w <= 0) return;
+
+          if (!animate) {
+            latch.style.transition = "none";
+          }
+
+          latch.style.transform = `translate3d(${x}px, 0, 0) scaleX(${w})`;
+
+          if (!animate) {
+            latch.offsetHeight;
+            latch.style.transition = "";
+          }
+
+          latch.style.opacity = "1";
+          latchReady = true;
+        }
+
+        function refreshPageBottom() {
+          pageBottom = document.documentElement.scrollHeight - 1;
+          if (currentId) placeLatch(currentId, false);
+        }
+
+        function setCurrent(id) {
+          if (!id || id === currentId) return;
+          currentId = id;
+          links.forEach((link, href) => {
+            if (href === id) link.setAttribute("aria-current", "location");
+            else link.removeAttribute("aria-current");
+          });
+          placeLatch(id, latchReady);
+        }
+
+        function pickActive() {
+          if (window.innerHeight + window.scrollY >= pageBottom) {
+            setCurrent("contact");
+            return;
+          }
+
+          let active = sectionIds[0];
+          for (const id of sectionIds) {
+            if (visible.get(id)) active = id;
+          }
+          setCurrent(active);
+        }
+
+        function schedulePickActive() {
+          if (rafId) return;
+          rafId = requestAnimationFrame(() => {
+            rafId = 0;
+            pickActive();
+          });
+        }
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              visible.set(entry.target.id, entry.isIntersecting);
+            });
+            schedulePickActive();
+          },
+          {
+            /* rail is sticky at 3rem — latch to the section owning the band below it */
+            rootMargin: `-${RAIL_H}px 0px -65% 0px`,
+            threshold: 0,
+          }
+        );
+
+        sections.forEach((section) => observer.observe(section));
+        refreshPageBottom();
+        window.addEventListener("resize", refreshPageBottom, { passive: true });
+        window.addEventListener("scroll", schedulePickActive, { passive: true });
+        document.fonts?.ready?.then(() => {
+          if (currentId) placeLatch(currentId, false);
+        });
+        pickActive();
+      } catch (_) {}
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initSectionLatch);
+    } else {
+      initSectionLatch();
+    }
+  })();
+</script>

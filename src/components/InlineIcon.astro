@@ -1,0 +1,38 @@
+---
+import { icon } from "src/data/icons";
+
+export interface Props {
+  /** Iconify name, e.g. "logos:astro". Must exist in src/data/icons.ts. */
+  name: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { name, ...rest } = Astro.props;
+const found = icon(name);
+
+/**
+ * A mark next to its own text label is decoration, which is the common case,
+ * so hide it by default: an unnamed role="img" lands in the accessibility tree
+ * as an unlabelled image. Pass aria-label (or aria-labelledby) to opt into
+ * being announced; that is the only case where the role earns its place.
+ */
+const labelled = "aria-label" in rest || "aria-labelledby" in rest;
+const a11y = labelled
+  ? ({ role: "img" } as const)
+  : ({ "aria-hidden": "true", focusable: "false" } as const);
+---
+
+{
+  found && (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox={found.viewBox}
+      width="1em"
+      height="1em"
+      {...a11y}
+      {...rest}
+      set:html={found.body}
+    />
+  )
+}
