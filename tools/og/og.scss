@@ -1,0 +1,170 @@
+/* Standalone 1200x630 canvas for the OG render — not part of the site build.
+   Reuses base.scss tokens/fonts (imported separately in main.ts, the same
+   way Layout.astro does it — @use-ing it from here breaks the @font-face
+   url() resolution) and the global .sg-label/.sg-value primitives; layout
+   below is sized for a fixed screenshot rather than a responsive page. */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  background: var(--bg);
+  /* base.scss reserves body padding-bottom for the site's fixed ActionBar,
+     which this standalone page never renders — without the reset above,
+     that padding pushes the document past 630px and bakes a scrollbar into
+     the screenshot. */
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+.og-card {
+  position: relative;
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.og-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, var(--rule-strong) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: 8px 8px;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 55%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 55%);
+}
+
+.og-rules {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding-inline: 4.5rem;
+}
+
+.og-rules span {
+  border-left: 1px solid var(--rule);
+}
+
+.og-rules span:last-child {
+  border-right: 1px solid var(--rule);
+}
+
+.og-bar {
+  position: relative;
+  z-index: 1;
+  height: 5.25rem;
+  display: flex;
+  align-items: center;
+  padding-inline: 4.5rem;
+  border-bottom: 1px solid var(--rule);
+  flex-shrink: 0;
+}
+
+.og-mark {
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-1);
+}
+
+.og-main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.25rem;
+  padding-inline: 4.5rem;
+}
+
+.og-nameplate {
+  font-family: var(--dot);
+  font-weight: 600;
+  font-size: 7.5rem;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: var(--ink-0);
+  margin: 0;
+}
+
+.og-dot {
+  display: inline-block;
+  width: 0.16em;
+  height: 0.16em;
+  margin-left: 0.14em;
+  vertical-align: 0.08em;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.og-role {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 2.125rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+  max-width: 40ch;
+  margin: 0;
+}
+
+.og-specs {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  /* Focus carries the longest value ("TYPESCRIPT · AI ENGINEERING"), so it
+     gets the extra room — an even 1fr split wraps it to two lines. */
+  grid-template-columns: 0.8fr 1.4fr 0.8fr;
+  padding-inline: 4.5rem;
+  margin: 0;
+  border-top: 1px solid var(--rule);
+  flex-shrink: 0;
+}
+
+.og-specs > div {
+  padding-block: 1.125rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+  min-width: 0;
+}
+
+.og-specs > div + div {
+  border-left: 1px solid var(--rule);
+  padding-left: 2rem;
+}
+
+.og-specs dt {
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.og-specs dd {
+  font-family: var(--mono);
+  font-size: 1.1875rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-1);
+  margin: 0;
+  white-space: nowrap;
+}
