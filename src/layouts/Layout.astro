@@ -55,6 +55,7 @@ const ogImage = new URL(`${baseUrl}og-image.png`, Astro.site).href;
         link: [{ rel: "icon", href: `${baseUrl}favicon.svg`, type: "image/svg+xml" }],
       }}
     />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     {
       fonts.map((href) => (
         <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />

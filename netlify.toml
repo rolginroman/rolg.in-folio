@@ -1,10 +1,10 @@
-# caching
+# caching — filenames under /public/ are content-hashed at build time
+[[headers]]
+  for = "/public/*.css"
+  [headers.values]
+  Cache-Control = "public, max-age=31536000, immutable"
 [[headers]]
   for = "/public/*.woff2"
-    [headers.values]
-    Cache-Control = "public, max-age=31536000"
-[[headers]]
-  for = "/public/*.woff"
-    [headers.values]
-    Cache-Control = "public, max-age=31536000"
-# caching end    
+  [headers.values]
+  Cache-Control = "public, max-age=31536000, immutable"
+# caching end
