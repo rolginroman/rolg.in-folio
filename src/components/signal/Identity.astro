@@ -51,11 +51,13 @@ const specs = [
       <img
         src={photo.src}
         srcset={photo.srcset}
+        sizes={photo.sizes}
         width="256"
         height="256"
         alt={photo.alt}
         decoding="async"
         loading="eager"
+        fetchpriority="high"
         crossorigin="anonymous"
       />
       <canvas class="raster" aria-hidden="true"></canvas>
