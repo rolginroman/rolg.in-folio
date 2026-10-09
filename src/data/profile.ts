@@ -30,17 +30,24 @@ export const bio = [
   "Exploring the realm of open-source software, eagerly anticipating personal growth and development in this domain.",
 ] as const;
 
+const CLOUDINARY = "https://res.cloudinary.com/dmxeucrmr/image/upload";
+const PHOTO_ID = "IMG_4639_idlkrv.jpg";
+
+/** Square portrait crop; f_auto/q_auto keep bytes down without a separate type list. */
+function portraitUrl(side: number) {
+  return `${CLOUDINARY}/c_fill,f_auto,q_auto,h_${side},w_${side}/${PHOTO_ID}`;
+}
+
+const portraitWidths = [96, 192, 256, 320, 640] as const;
+
 export const photo = {
   alt: "Roman Rolgin photo",
-  src: "https://res.cloudinary.com/dmxeucrmr/image/upload/c_fill,h_256,w_256/IMG_4639_idlkrv.jpg",
-  srcset:
-    "https://res.cloudinary.com/dmxeucrmr/image/upload/c_fill,h_256,w_256/IMG_4639_idlkrv.jpg 1x, https://res.cloudinary.com/dmxeucrmr/image/upload/c_fill,h_512,w_512/IMG_4639_idlkrv.jpg 2x",
-  webpSrcset:
-    "https://res.cloudinary.com/dmxeucrmr/image/upload/c_fill,h_256,w_256/f_webp/IMG_4639_idlkrv.jpg 1x, https://res.cloudinary.com/dmxeucrmr/image/upload/c_fill,h_512,w_512/f_webp/IMG_4639_idlkrv.jpg 2x",
+  src: portraitUrl(256),
+  srcset: portraitWidths.map((w) => `${portraitUrl(w)} ${w}w`).join(", "),
+  sizes: "(max-width: 59.99rem) 5.5rem, (max-width: 79.99rem) 25vw, 300px",
   /** Larger renditions, in case a layout wants an editorial-scale portrait. */
-  largeSrc: "https://res.cloudinary.com/dmxeucrmr/image/upload/c_fill,h_800,w_640/IMG_4639_idlkrv.jpg",
-  largeWebpSrcset:
-    "https://res.cloudinary.com/dmxeucrmr/image/upload/c_fill,h_800,w_640/f_webp/IMG_4639_idlkrv.jpg 1x, https://res.cloudinary.com/dmxeucrmr/image/upload/c_fill,h_1600,w_1280/f_webp/IMG_4639_idlkrv.jpg 2x",
+  largeSrc: `${CLOUDINARY}/c_fill,f_auto,q_auto,h_800,w_640/${PHOTO_ID}`,
+  largeSrcset: `${CLOUDINARY}/c_fill,f_auto,q_auto,h_800,w_640/${PHOTO_ID} 640w, ${CLOUDINARY}/c_fill,f_auto,q_auto,h_1600,w_1280/${PHOTO_ID} 1280w`,
   width: 242,
   height: 242,
 } as const;

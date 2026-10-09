@@ -15,6 +15,14 @@
   font-display: swap;
 }
 @font-face {
+  font-family: "Space Grotesk Fallback";
+  src: local("Arial");
+  size-adjust: 109.69%;
+  ascent-override: 89.71%;
+  descent-override: 26.62%;
+  line-gap-override: 0%;
+}
+@font-face {
   font-family: "Space Mono";
   src: url("./fonts/space-mono-latin-400.woff2") format("woff2");
   font-weight: 400;
@@ -32,7 +40,7 @@
 :root {
   color-scheme: dark;
 
-  --sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --sans: "Space Grotesk", "Space Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
   --mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --dot: "Doto", "Space Mono", ui-monospace, monospace;
 
