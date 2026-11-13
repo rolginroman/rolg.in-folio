@@ -12,5 +12,6 @@ export const links = {
     rtech: "https://l.rolg.in/plugins",
     wavepulse: "https://l.rolg.in/wavepulse",
     rolginfolio: "https://l.rolg.in/portfolio-website",
+    rutaexam: "https://rutaexam.com",
   }
 }

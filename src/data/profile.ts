@@ -23,10 +23,10 @@ export const identity = {
   githubSince: 2013,
 } as const;
 
-/** Bio paragraphs, verbatim from the live Projects section. */
+/** Bio paragraphs, adapted from the live Projects section. */
 export const bio = [
   `Experienced software engineer with ${yearsOfExperience}+ years in web development.`,
-  "Proficient in Angular, TypeScript, system architecture. My true passion lies in creating user-centric designs, optimizing UX, and driving business metrics through a combination of development expertise and effective people management.",
+  "I build user-facing products end to end and own what they do for the business: the UX, the quality bar, and the metrics a change is supposed to move. I work with product and business owners on what gets built, and I grow the engineers around me through mentoring and review. TypeScript and system architecture are the tools, not the job.",
   "Exploring the realm of open-source software, eagerly anticipating personal growth and development in this domain.",
 ] as const;
 
@@ -241,6 +241,20 @@ export const projects: Project[] = [
     tags: ["AI agent orchestration", "TypeScript", "CI/CD automation", "developer tooling"],
   },
   {
+    name: "RutaExam",
+    description: "A driving-theory exam trainer for Spain, built on the official DGT syllabus and served in Spanish and English.",
+    detail:
+      "I built it and run it on my own: practice tests and mock exams, a vocabulary layer over the questions, a road-signs registry and written guides. It runs on React and TanStack Start at the edge on Cloudflare, with its database and media storage alongside, Stripe subscriptions behind a Pro tier, a scheduled Telegram bot, an end-to-end browser suite over the real flows, and error monitoring.",
+    outcome:
+      "It operates as a business rather than a portfolio piece — it takes payments, serves learners in two languages, and deploys itself.",
+    link: "https://rutaexam.com",
+    mark: "RX",
+    language: "TypeScript",
+    year: 2026,
+    kind: "own",
+    tags: ["React", "Cloudflare Workers", "Stripe", "end-to-end testing"],
+  },
+  {
     name: "Solana Payments SDK",
     description: "Streaming payments release money second by second, and a rounding error is somebody's salary.",
     detail:
@@ -294,6 +308,20 @@ export const projects: Project[] = [
     year: 2026,
     kind: "own",
     tags: ["LLM evaluation", "AI agents", "TypeScript", "test harness design"],
+  },
+  {
+    name: "Education Platform at Scale",
+    description:
+      "An education platform's public pages only earn traffic if search engines can read them, and a single-page app hides its content by default.",
+    detail:
+      "Senior engineer on a large online-education platform from 2020 to 2023. I made a large Angular single-page app readable to search engines and fast on real devices, taking its public learning site to about 2M monthly visits and over 200k newly indexed pages. I also built the billing front end with its subscription and refund flows, looked after the Nx monorepo the platform's projects shipped from, and ran the technical reviews that broke large work into deliverable pieces.",
+    outcome:
+      "Search traffic became something the team could grow on purpose, paying customers got subscription and refund flows that held up, and the shared build pipeline got substantially faster.",
+    mark: "ED",
+    language: "TypeScript",
+    year: 2023,
+    kind: "work",
+    tags: ["Angular", "Nx monorepo", "SEO & Core Web Vitals", "billing"],
   },
 ];
 
